@@ -30,6 +30,10 @@ serve(async (req) => {
 
   try {
     const { therapyGoal, communicationLevel, studentInterests } = await req.json()
+    
+    if (!geminiKey) {
+      throw new Error('GEMINI_API_KEY is not configured')
+    }
 
     // User-specific prompt that builds on the system instructions
     const prompt = `Based on these specific parameters:
@@ -46,8 +50,8 @@ Format the response as a JSON object with:
   "content": "The full story text"
 }`
 
-    // Call Gemini API with the updated model and prompts
-    const response = await fetch('https://generativelanguage.googleapis.com/v1/models/gemini-1.0-pro-vision-latest:generateContent', {
+    // Call Gemini API with the correct model
+    const response = await fetch('https://generativelanguage.googleapis.com/v1/models/gemini-1.0-pro:generateContent', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -86,8 +90,19 @@ Format the response as a JSON object with:
       })
     })
 
+    if (!response.ok) {
+      const errorData = await response.text()
+      console.error('Gemini API error:', errorData)
+      throw new Error(`Gemini API returned ${response.status}: ${errorData}`)
+    }
+
     const data = await response.json()
     console.log('Gemini API Response:', data)
+
+    if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+      console.error('Unexpected Gemini API response structure:', data)
+      throw new Error('Invalid response structure from Gemini API')
+    }
 
     // Extract the text from the response
     const generatedText = data.candidates[0].content.parts[0].text
@@ -113,9 +128,12 @@ Format the response as a JSON object with:
       })
     }
   } catch (error) {
-    console.error('Error:', error)
+    console.error('Error in generate-story function:', error)
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        details: error.stack 
+      }),
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
