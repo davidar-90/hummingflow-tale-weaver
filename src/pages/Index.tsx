@@ -28,6 +28,50 @@ const Index = () => {
     }));
   };
 
+  const cleanAndParseResponse = (response: any) => {
+    try {
+      let data = response;
+      
+      // If the response is a string, try to parse it
+      if (typeof response === 'string') {
+        // Remove markdown code block syntax if present
+        data = response.replace(/```json\n|\n```/g, '').trim();
+        
+        // If the string starts with a bracket or brace, try to parse it as JSON
+        if (data.startsWith('{') || data.startsWith('[')) {
+          data = JSON.parse(data);
+        }
+      }
+
+      // If we have an object with title/content properties
+      if (data && typeof data === 'object') {
+        // Extract title and content, cleaning any remaining JSON artifacts
+        let title = data.title || '';
+        let content = data.content || '';
+
+        // Clean the title
+        title = title.replace(/^["']|["']$/g, '').trim();
+        
+        // Clean the content
+        content = content
+          .replace(/\\n/g, '\n') // Convert \n to actual line breaks
+          .replace(/\\"/g, '"') // Convert escaped quotes
+          .replace(/^["']|["']$/g, '') // Remove surrounding quotes
+          .trim();
+
+        return { title, content };
+      }
+
+      throw new Error('Invalid response format');
+    } catch (error) {
+      console.error('Error parsing response:', error);
+      return {
+        title: 'Error parsing title',
+        content: 'There was an error processing the story. Please try again.'
+      };
+    }
+  };
+
   const generateStory = async () => {
     if (!storyData.therapyGoal || !storyData.communicationLevel || !storyData.studentInterests) {
       toast.error("Please fill in all required fields");
@@ -47,30 +91,12 @@ const Index = () => {
 
       if (error) throw error;
 
-      // Clean and parse the response
-      let storyTitle = '';
-      let storyContent = '';
-
-      if (typeof data === 'string') {
-        // Remove any markdown code block syntax if present
-        const cleanData = data.replace(/```json\n|\n```/g, '');
-        try {
-          const parsedData = JSON.parse(cleanData);
-          storyTitle = parsedData.title;
-          storyContent = parsedData.content;
-        } catch (e) {
-          console.error('Error parsing JSON:', e);
-          throw new Error('Failed to parse story data');
-        }
-      } else if (data && typeof data === 'object') {
-        storyTitle = data.title || 'Untitled Story';
-        storyContent = data.content || 'An error occurred while generating the story.';
-      }
+      const { title, content } = cleanAndParseResponse(data);
 
       setStoryData(prev => ({
         ...prev,
-        storyTitle,
-        storyContent
+        storyTitle: title,
+        storyContent: content
       }));
 
       toast.success("Story generated successfully!");
@@ -208,7 +234,7 @@ const Index = () => {
                   placeholder="Story content will appear here..."
                   value={storyData.storyContent}
                   onChange={(e) => handleInputChange('storyContent', e.target.value)}
-                  className={`min-h-[400px] text-input resize-none bg-white/50 ${storyData.storyContent ? 'text-black' : 'text-gray-500'}`}
+                  className={`min-h-[400px] text-input resize-none bg-white/50 ${storyData.storyContent ? 'text-black' : 'text-gray-500'} whitespace-pre-wrap`}
                 />
               </div>
 
@@ -226,4 +252,3 @@ const Index = () => {
 };
 
 export default Index;
-
