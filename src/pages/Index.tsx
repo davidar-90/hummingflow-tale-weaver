@@ -83,14 +83,12 @@ const Index = () => {
     }
     
     try {
-      // Combine title and story content, with continuation if it exists
-      const fullText = `${storyData.storyTitle}.\n\n${storyData.storyContent}${
-        interactionPoint?.selectedChoice !== undefined && interactionPoint?.continuation 
-          ? `\n\n${interactionPoint.continuation}`
-          : ''
-      }`;
+      // Combine story content with continuation if it exists
+      const fullStoryText = interactionPoint?.selectedChoice !== undefined && interactionPoint?.continuation 
+        ? `${storyData.storyContent}\n\n${interactionPoint.continuation}`
+        : storyData.storyContent;
 
-      await generateVoice(fullText);
+      await generateVoice(fullStoryText);
       toast.success("Voice generated successfully!");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to generate voice. Please try again.");
