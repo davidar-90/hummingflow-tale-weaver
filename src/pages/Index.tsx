@@ -48,29 +48,47 @@ const Index = () => {
     toast.success("Story cleared successfully!");
   };
 
-  const generateImage = async (prompt: string, isInitialStory: boolean = true) => {
+  const generateImage = async () => {
+    if (!storyData.storyContent) {
+      toast.error("Please generate a story first");
+      return;
+    }
+    
     setIsGeneratingImage(true);
     try {
       const { data, error } = await supabase.functions.invoke('generate-image', {
-        body: { prompt }
+        body: { prompt: storyData.imagePrompt || storyData.storyContent }
       });
 
       if (error) throw error;
 
-      const imageUrl = data.candidates[0].content.parts[0].text;
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      console.log('Image generation response:', data);
       
       setStoryData(prev => ({
         ...prev,
-        [isInitialStory ? 'storyImage' : 'continuationImage']: imageUrl
+        storyImage: data.imageUrl
       }));
 
-      toast.success(`Image generated successfully for ${isInitialStory ? 'story' : 'continuation'}!`);
+      toast.success('Image generated successfully!');
     } catch (error) {
       console.error('Error generating image:', error);
       toast.error('Failed to generate image. Please try again.');
     } finally {
       setIsGeneratingImage(false);
     }
+  };
+
+  const generateVoice = async () => {
+    if (!storyData.storyContent) {
+      toast.error("Please generate a story first");
+      return;
+    }
+    
+    toast.info("Voice generation coming soon!");
   };
 
   const generateStory = async () => {
@@ -341,14 +359,35 @@ const Index = () => {
                     />
                   </div>
 
-                  <Button 
-                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-6 rounded-xl shadow-md transition-colors duration-200"
-                    onClick={generateStory}
-                    disabled={isGenerating}
-                  >
-                    {isGenerating ? 'Generating...' : 'Generate Story'}
-                    <Sparkles className="ml-2 h-5 w-5" />
-                  </Button>
+                  <div className="form-group">
+                    <div className="flex flex-wrap gap-4">
+                      <Button 
+                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-6 rounded-xl shadow-md transition-colors duration-200"
+                        onClick={generateStory}
+                        disabled={isGenerating}
+                      >
+                        {isGenerating ? 'Generating...' : 'Generate Story'}
+                        <Sparkles className="ml-2 h-5 w-5" />
+                      </Button>
+
+                      <Button 
+                        className="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-6 rounded-xl shadow-md transition-colors duration-200"
+                        onClick={generateImage}
+                        disabled={isGeneratingImage}
+                      >
+                        {isGeneratingImage ? 'Generating...' : 'Generate Image'}
+                        <Sparkles className="ml-2 h-5 w-5" />
+                      </Button>
+
+                      <Button 
+                        className="flex-1 bg-green-600 hover:bg-green-700 text-white py-6 rounded-xl shadow-md transition-colors duration-200"
+                        onClick={generateVoice}
+                      >
+                        Generate Voice
+                        <Sparkles className="ml-2 h-5 w-5" />
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </div>
 
