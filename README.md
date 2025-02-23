@@ -49,19 +49,11 @@ npm run dev
 - **UI Framework**: Tailwind CSS with shadcn/ui
 - **State Management**: React Hooks
 
-## Contributing
-To contribute to this project:
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
+
 
 ## Deployment
 You can deploy this project in several ways:
 
-1. **Using Lovable**
-   - Open [Lovable](https://lovable.dev/projects/0c6adf2a-90e8-4f7d-8c39-ce97985fe72b)
-   - Click on Share -> Publish
 
 2. **Custom Domain**
    - While we don't support custom domains directly yet, you can deploy to Netlify
@@ -69,7 +61,5 @@ You can deploy this project in several ways:
 
 ## Support
 - Documentation: [Lovable Docs](https://docs.lovable.dev/)
-- Project URL: [HummingFlow Studio on Lovable](https://lovable.dev/projects/0c6adf2a-90e8-4f7d-8c39-ce97985fe72b)
 
-## License
-This project is licensed under the MIT License - see the LICENSE file for details.
+
