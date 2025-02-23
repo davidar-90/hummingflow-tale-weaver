@@ -32,8 +32,20 @@ export const useImageGeneration = () => {
         body: { prompt: storyPrompt }
       });
 
-      if (storyImageError) throw storyImageError;
-      if (storyImageData.error) throw new Error(storyImageData.error);
+      if (storyImageError) {
+        console.error('Story image generation error:', storyImageError);
+        throw storyImageError;
+      }
+
+      if (storyImageData.error) {
+        console.error('Story image API error:', storyImageData.error);
+        throw new Error(storyImageData.error);
+      }
+
+      if (!storyImageData.imageUrl) {
+        console.error('No image URL in response:', storyImageData);
+        throw new Error('Failed to generate image: No image URL received');
+      }
 
       let continuationImage = null;
       // Generate continuation image if available
@@ -45,8 +57,20 @@ export const useImageGeneration = () => {
           body: { prompt: continuationPrompt }
         });
 
-        if (continuationImageError) throw continuationImageError;
-        if (continuationImageData.error) throw new Error(continuationImageData.error);
+        if (continuationImageError) {
+          console.error('Continuation image generation error:', continuationImageError);
+          throw continuationImageError;
+        }
+
+        if (continuationImageData.error) {
+          console.error('Continuation image API error:', continuationImageData.error);
+          throw new Error(continuationImageData.error);
+        }
+
+        if (!continuationImageData.imageUrl) {
+          console.error('No continuation image URL in response:', continuationImageData);
+          throw new Error('Failed to generate continuation image: No image URL received');
+        }
 
         continuationImage = continuationImageData.imageUrl;
       }
@@ -55,6 +79,10 @@ export const useImageGeneration = () => {
         storyImage: storyImageData.imageUrl,
         continuationImage
       };
+    } catch (error) {
+      console.error('Image generation error:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to generate image. Please try again.');
+      throw error;
     } finally {
       setIsGeneratingImage(false);
     }
