@@ -89,7 +89,7 @@ const Index = () => {
                     <SelectValue placeholder="None (Optional)" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="none">None (Optional)</SelectItem>
+                    <SelectItem value="none">None</SelectItem>
                     <SelectItem value="visual">Visual Cues</SelectItem>
                     <SelectItem value="verbal">Verbal Prompts</SelectItem>
                     <SelectItem value="breathing">Deep Breaths</SelectItem>
