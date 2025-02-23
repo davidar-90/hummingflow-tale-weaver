@@ -29,7 +29,6 @@ const Index = () => {
   };
 
   const generateStory = async () => {
-    // Validate required fields
     if (!storyData.therapyGoal || !storyData.communicationLevel || !storyData.studentInterests) {
       toast.error("Please fill in all required fields");
       return;
@@ -48,10 +47,30 @@ const Index = () => {
 
       if (error) throw error;
 
+      // Clean and parse the response
+      let storyTitle = '';
+      let storyContent = '';
+
+      if (typeof data === 'string') {
+        // Remove any markdown code block syntax if present
+        const cleanData = data.replace(/```json\n|\n```/g, '');
+        try {
+          const parsedData = JSON.parse(cleanData);
+          storyTitle = parsedData.title;
+          storyContent = parsedData.content;
+        } catch (e) {
+          console.error('Error parsing JSON:', e);
+          throw new Error('Failed to parse story data');
+        }
+      } else if (data && typeof data === 'object') {
+        storyTitle = data.title || 'Untitled Story';
+        storyContent = data.content || 'An error occurred while generating the story.';
+      }
+
       setStoryData(prev => ({
         ...prev,
-        storyTitle: data.title || 'Untitled Story',
-        storyContent: data.content || 'An error occurred while generating the story.'
+        storyTitle,
+        storyContent
       }));
 
       toast.success("Story generated successfully!");
@@ -151,7 +170,7 @@ const Index = () => {
                   placeholder="e.g., space, dinosaurs"
                   value={storyData.studentInterests}
                   onChange={(e) => handleInputChange('studentInterests', e.target.value)}
-                  className="text-input"
+                  className={`text-input ${storyData.studentInterests ? 'text-black' : 'text-gray-500'}`}
                 />
               </div>
 
@@ -178,7 +197,7 @@ const Index = () => {
                   placeholder="Story title..."
                   value={storyData.storyTitle}
                   onChange={(e) => handleInputChange('storyTitle', e.target.value)}
-                  className="text-input"
+                  className={`text-input ${storyData.storyTitle ? 'text-black' : 'text-gray-500'}`}
                 />
               </div>
               
@@ -189,7 +208,7 @@ const Index = () => {
                   placeholder="Story content will appear here..."
                   value={storyData.storyContent}
                   onChange={(e) => handleInputChange('storyContent', e.target.value)}
-                  className="min-h-[400px] text-input resize-none bg-white/50"
+                  className={`min-h-[400px] text-input resize-none bg-white/50 ${storyData.storyContent ? 'text-black' : 'text-gray-500'}`}
                 />
               </div>
 
@@ -207,3 +226,4 @@ const Index = () => {
 };
 
 export default Index;
+
