@@ -62,13 +62,14 @@
 }
 
 .text-input {
-  @apply w-full px-4 py-3 rounded-xl border border-gray-200/50 bg-white/70 backdrop-blur-sm shadow-sm
+  @apply w-full px-4 py-3 rounded-xl border border-gray-200 bg-white shadow-sm
          focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/30 
-         transition-all duration-200 hover:border-purple-400/20;
+         transition-all duration-200 hover:border-purple-400/20
+         placeholder:text-gray-400 text-gray-900;
 }
 
 .select-input {
-  @apply w-full px-4 py-3 rounded-xl border border-gray-200/50 bg-white/70 backdrop-blur-sm shadow-sm
+  @apply w-full px-4 py-3 rounded-xl border border-gray-200 bg-white shadow-sm
          focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500/30
          transition-all duration-200 hover:border-purple-400/20;
 }

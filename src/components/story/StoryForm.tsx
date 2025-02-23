@@ -128,7 +128,7 @@ export const StoryForm = ({
           placeholder="e.g., space, dinosaurs"
           value={storyData.studentInterests}
           onChange={(e) => onInputChange('studentInterests', e.target.value)}
-          className={`text-input ${storyData.studentInterests ? 'text-gray-900' : 'text-gray-500'}`}
+          className="text-input"
         />
       </div>
 
