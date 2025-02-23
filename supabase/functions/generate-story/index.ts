@@ -9,22 +9,31 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-// System instructions that will be consistent for all requests
-const systemInstructions = `You are an expert in creating social stories for children with different communication needs. 
+// Updated system instructions to focus on interactive storytelling
+const systemInstructions = `You are an expert in creating interactive social stories for children with different communication needs. 
 Your stories should:
-- Have a clear beginning, middle, and end structure
-- Be positive and encouraging throughout
+- Have a clear beginning, middle (with an interaction point), and end structure
+- Be engaging and age-appropriate
+- Include one clear interaction point where the student practices the therapy goal
+- Provide multiple choice options that test understanding of the skill
+- Have a clear "best" answer that demonstrates mastery of the skill
 - Use simple, clear language appropriate for the child's communication level
-- Include repetition of key concepts when appropriate
-- Be concise but impactful
-- Focus on one main concept or skill at a time
+- Connect with the child's interests throughout the narrative
+- Be positive and encouraging
 - Use present tense and first person when possible
-- Avoid abstract concepts unless specifically appropriate for the communication level
-- Include concrete examples and clear action steps
-- Maintain an engaging narrative that connects with the child's interests`
+- Make the interaction feel natural within the story flow`
 
 // Helper function to extract and parse JSON from Gemini response
-function parseGeminiResponse(response: string): { title: string; content: string } | null {
+function parseGeminiResponse(response: string): { 
+  title: string; 
+  content: string;
+  interactionPoint: {
+    prompt: string;
+    choices: { text: string; isCorrect: boolean }[];
+    feedback: { correct: string; incorrect: string };
+    continuation: string;
+  };
+} | null {
   try {
     // Step 1: Remove triple backticks if present
     let cleanedResponse = response.replace(/^```json\s*|\s*```$/g, '').trim();
@@ -44,14 +53,20 @@ function parseGeminiResponse(response: string): { title: string; content: string
     const parsed = JSON.parse(jsonStr);
 
     // Validate the structure
-    if (!parsed.title || !parsed.content) {
+    if (!parsed.title || !parsed.content || !parsed.interactionPoint) {
       console.error('Parsed JSON missing required fields');
       return null;
     }
 
     return {
       title: parsed.title.trim(),
-      content: parsed.content.trim()
+      content: parsed.content.trim(),
+      interactionPoint: {
+        prompt: parsed.interactionPoint.prompt.trim(),
+        choices: parsed.interactionPoint.choices,
+        feedback: parsed.interactionPoint.feedback,
+        continuation: parsed.interactionPoint.continuation.trim()
+      }
     };
   } catch (error) {
     console.error('Error parsing Gemini response:', error);
@@ -77,12 +92,34 @@ Therapy Goal: ${therapyGoal}
 Communication Level: ${communicationLevel}
 Student Interests: ${studentInterests}
 
-Create an engaging social story that follows our guidelines, incorporating the student's interests and maintaining appropriate language for their communication level.
+Create an engaging interactive social story that follows our guidelines. The story should have a clear point where the student needs to make a choice that practices the therapy goal.
 
 Format your response as a JSON object like this, without any markdown formatting or additional text:
 {
   "title": "An engaging, clear title",
-  "content": "The full story content with appropriate line breaks"
+  "content": "The first part of the story that leads up to the interaction point",
+  "interactionPoint": {
+    "prompt": "A question or situation where the student needs to make a choice",
+    "choices": [
+      {
+        "text": "Choice 1 (correct answer that demonstrates the therapy goal)",
+        "isCorrect": true
+      },
+      {
+        "text": "Choice 2 (incorrect but plausible answer)",
+        "isCorrect": false
+      },
+      {
+        "text": "Choice 3 (incorrect but plausible answer)",
+        "isCorrect": false
+      }
+    ],
+    "feedback": {
+      "correct": "Positive reinforcement message explaining why this was a good choice",
+      "incorrect": "Supportive message encouraging trying again and explaining the skill"
+    },
+    "continuation": "The rest of the story that follows after the interaction, incorporating the learning moment"
+  }
 }`
 
     // Call Gemini API
