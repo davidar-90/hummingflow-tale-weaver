@@ -6,7 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const GENAI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent';
+const IMAGEN_API_URL = 'https://generativelanguage.googleapis.com/v1/models/imagen-3.0-generate-002:generateImages';
 const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
 
 serve(async (req) => {
@@ -19,20 +19,21 @@ serve(async (req) => {
     console.log('Received image generation request with prompt:', prompt);
 
     const request = {
-      contents: [{
-        parts: [{
-          text: prompt
-        }]
-      }],
-      generationConfig: {
-        temperature: 0.7,
-        maxOutputTokens: 200
+      prompt: {
+        text: `High quality digital illustration in a friendly children's book style: ${prompt}`,
+      },
+      parameters: {
+        numberOfImages: 1,
+        aspectRatio: "16:9",
+        safetySettings: {
+          filterLevel: "BLOCK_MEDIUM_AND_ABOVE"
+        }
       }
     };
 
-    console.log('Sending request to Gemini API:', JSON.stringify(request, null, 2));
+    console.log('Sending request to Imagen API:', JSON.stringify(request, null, 2));
 
-    const response = await fetch(`${GENAI_API_URL}?key=${GEMINI_API_KEY}`, {
+    const response = await fetch(`${IMAGEN_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -42,12 +43,12 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Gemini API error:', errorText);
+      console.error('Imagen API error:', errorText);
       throw new Error(`Failed to generate image: ${response.statusText}`);
     }
 
     const data = await response.json();
-    console.log('Received response from Gemini:', JSON.stringify(data, null, 2));
+    console.log('Received response from Imagen:', JSON.stringify(data, null, 2));
 
     return new Response(JSON.stringify(data), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
