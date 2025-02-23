@@ -22,7 +22,21 @@ serve(async (req) => {
   }
 
   try {
-    const { prompt } = await req.json();
+    let requestBody;
+    try {
+      requestBody = await req.json();
+    } catch (error) {
+      console.error('[Debug] Failed to parse request body:', error);
+      return new Response(
+        JSON.stringify({ error: 'Invalid request body' }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    const { prompt } = requestBody;
     const RUNWARE_API_KEY = Deno.env.get('RUNWARE_API_KEY');
 
     if (!RUNWARE_API_KEY) {
@@ -47,7 +61,7 @@ serve(async (req) => {
 
     console.log('[Debug] Generating image with prompt:', prompt);
 
-    const response = await fetch(API_ENDPOINT, {
+    const apiResponse = await fetch(API_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -62,7 +76,7 @@ serve(async (req) => {
           taskType: "imageInference",
           taskUUID: crypto.randomUUID(),
           positivePrompt: `Generate an image with a dynamic, stylized animation aesthetic, reminiscent of a modern comic book or graphic novel: ${prompt}. Employ vibrant, saturated colors with layered, textured overlays and halftone patterns. Use strong, exaggerated motion blur and speed lines to convey kinetic energy. Incorporate bold ink lines and fragmented imagery, with a focus on dynamic perspective. The overall feel should be energetic and visually diverse, similar to a pop art inspired animation.`,
-          model: "runware:100@1",  // Changed to use the correct model identifier
+          model: "runware:100@1",
           width: WIDTH,
           height: HEIGHT,
           numberResults: 1,
@@ -74,18 +88,37 @@ serve(async (req) => {
       ])
     });
 
-    const text = await response.text();
-    console.log('[Debug] Raw response:', text);
+    // First check if the response is ok
+    if (!apiResponse.ok) {
+      console.error('[Debug] API response not ok:', apiResponse.status, apiResponse.statusText);
+      return new Response(
+        JSON.stringify({ 
+          error: 'API request failed',
+          status: apiResponse.status,
+          statusText: apiResponse.statusText
+        }),
+        { 
+          status: apiResponse.status,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
 
+    // Get response text first
+    const responseText = await apiResponse.text();
+    console.log('[Debug] Raw API response:', responseText);
+
+    // Try to parse the response
     let data;
     try {
-      data = JSON.parse(text);
-    } catch (parseError) {
-      console.error('[Debug] JSON parsing error:', parseError);
+      data = JSON.parse(responseText);
+    } catch (error) {
+      console.error('[Debug] Failed to parse API response:', error);
       return new Response(
         JSON.stringify({ 
-          error: 'Failed to parse API response',
-          details: parseError.message 
+          error: 'Invalid JSON response from API',
+          details: error.message,
+          responseText: responseText
         }),
         { 
           status: 500,
@@ -94,29 +127,14 @@ serve(async (req) => {
       );
     }
 
-    if (!response.ok) {
-      console.error('[Debug] API error response:', data);
+    // Check if data has the expected structure
+    if (!Array.isArray(data?.data)) {
+      console.error('[Debug] Unexpected response structure:', data);
       return new Response(
         JSON.stringify({ 
-          error: 'Failed to generate image',
-          details: response.statusText,
-          data: data 
+          error: 'Unexpected API response structure',
+          response: data
         }),
-        { 
-          status: response.status,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
-
-    console.log('[Debug] Success response:', JSON.stringify(data, null, 2));
-
-    // Extract the image URL from the response
-    const imageData = data.data?.find((item: any) => item.taskType === "imageInference");
-    if (!imageData?.imageURL) {
-      console.error('[Debug] No image data found in response:', data);
-      return new Response(
-        JSON.stringify({ error: 'No image URL in response', data: data }),
         { 
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -124,6 +142,38 @@ serve(async (req) => {
       );
     }
 
+    // Find the image inference result
+    const imageData = data.data.find((item: any) => item.taskType === "imageInference");
+    
+    if (!imageData) {
+      console.error('[Debug] No image inference data found in response:', data);
+      return new Response(
+        JSON.stringify({ 
+          error: 'No image inference data in response',
+          response: data
+        }),
+        { 
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    if (!imageData.imageURL) {
+      console.error('[Debug] No image URL in inference data:', imageData);
+      return new Response(
+        JSON.stringify({ 
+          error: 'No image URL in response',
+          inferenceData: imageData
+        }),
+        { 
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    // Successfully got the image URL
     return new Response(
       JSON.stringify({ imageUrl: imageData.imageURL }),
       { 
@@ -131,12 +181,14 @@ serve(async (req) => {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
     );
+
   } catch (error) {
-    console.error('[Debug] Error in generate-image:', error);
+    console.error('[Debug] Unexpected error:', error);
     return new Response(
       JSON.stringify({ 
-        error: error.message || 'Internal server error',
-        stack: error.stack 
+        error: 'Internal server error',
+        message: error.message,
+        stack: error.stack
       }),
       { 
         status: 500,
