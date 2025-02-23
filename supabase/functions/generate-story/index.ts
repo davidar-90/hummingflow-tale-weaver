@@ -11,6 +11,8 @@ const corsHeaders = {
 };
 
 async function generateStoryContent(params: any) {
+  console.log('Generating story with params:', params);
+  
   const response = await fetch(`${GENAI_API_URL}?key=${GEMINI_API_KEY}`, {
     method: 'POST',
     headers: {
@@ -48,16 +50,38 @@ async function generateStoryContent(params: any) {
   });
 
   if (!response.ok) {
+    console.error('Gemini API error:', await response.text());
     throw new Error(`Failed to generate story content: ${response.statusText}`);
   }
 
   const geminiResponse = await response.json();
+  console.log('Raw Gemini Response:', JSON.stringify(geminiResponse, null, 2));
+
+  if (!geminiResponse.candidates?.[0]?.content?.parts?.[0]?.text) {
+    console.error('Invalid Gemini response format:', geminiResponse);
+    throw new Error('Invalid response format from Gemini API');
+  }
+
   const jsonContent = geminiResponse.candidates[0].content.parts[0].text;
+  console.log('Raw JSON content:', jsonContent);
+  
   const cleanJson = jsonContent.replace(/```json\n|\n```/g, '').trim();
-  return JSON.parse(cleanJson);
+  console.log('Cleaned JSON:', cleanJson);
+  
+  try {
+    const parsedData = JSON.parse(cleanJson);
+    console.log('Successfully parsed story data:', parsedData);
+    return parsedData;
+  } catch (error) {
+    console.error('JSON parsing error:', error);
+    console.error('Failed to parse JSON:', cleanJson);
+    throw new Error('Failed to parse story data from Gemini response');
+  }
 }
 
 async function generateImagePrompt(title: string, content: string, isInitial: boolean = true) {
+  console.log(`Generating ${isInitial ? 'initial' : 'continuation'} image prompt for:`, { title, content });
+  
   const response = await fetch(`${GENAI_API_URL}?key=${GEMINI_API_KEY}`, {
     method: 'POST',
     headers: {
@@ -85,11 +109,17 @@ async function generateImagePrompt(title: string, content: string, isInitial: bo
   });
 
   if (!response.ok) {
+    console.error('Image prompt generation error:', await response.text());
     throw new Error(`Failed to generate image prompt: ${response.statusText}`);
   }
 
   const geminiResponse = await response.json();
-  return geminiResponse.candidates[0].content.parts[0].text.trim();
+  console.log('Raw image prompt response:', JSON.stringify(geminiResponse, null, 2));
+  
+  const imagePrompt = geminiResponse.candidates[0].content.parts[0].text.trim();
+  console.log('Generated image prompt:', imagePrompt);
+  
+  return imagePrompt;
 }
 
 serve(async (req) => {
@@ -98,25 +128,29 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Received request:', await req.clone().text());
     const params = await req.json();
     
     // Step 1: Generate the story content
+    console.log('Step 1: Generating story content...');
     const storyData = await generateStoryContent(params);
-    console.log('Story data generated:', storyData);
+    console.log('Story data generated successfully');
 
     // Step 2: Generate the image prompt for the initial story
+    console.log('Step 2: Generating initial image prompt...');
     const imagePrompt = await generateImagePrompt(storyData.title, storyData.content);
-    console.log('Initial image prompt:', imagePrompt);
+    console.log('Initial image prompt generated successfully');
 
     // Step 3: If there's a continuation, generate its image prompt
     let continuationImagePrompt = '';
     if (storyData.interactionPoint?.continuation) {
+      console.log('Step 3: Generating continuation image prompt...');
       continuationImagePrompt = await generateImagePrompt(
         storyData.title,
         storyData.interactionPoint.continuation,
         false
       );
-      console.log('Continuation image prompt:', continuationImagePrompt);
+      console.log('Continuation image prompt generated successfully');
     }
 
     // Combine all data
@@ -131,9 +165,11 @@ serve(async (req) => {
 
     // Validate the final data
     if (!finalData.title || !finalData.content || !finalData.imagePrompt || !finalData.interactionPoint) {
+      console.error('Missing required fields in final data:', finalData);
       throw new Error('Generated story is missing required fields');
     }
 
+    console.log('Sending successful response with data:', finalData);
     return new Response(JSON.stringify(finalData), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
