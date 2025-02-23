@@ -6,7 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const IMAGEN_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/imagegeneration:generateImage';
+const IMAGEN_API_URL = 'https://generativelanguage.googleapis.com/v1/models/imagen-3.0-generate-002:generateImages';
 const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
 
 serve(async (req) => {
@@ -19,13 +19,11 @@ serve(async (req) => {
     console.log('Received image generation request with prompt:', prompt);
 
     const request = {
+      model: 'imagen-3.0-generate-002',
       prompt: `High quality digital illustration in a friendly children's book style: ${prompt}`,
-      sampleCount: 1,
-      samplerParams: {
-        height: 1024,
-        width: 1024,
-        samplingMethod: "DDIM",
-        guidanceScale: 7.0
+      config: {
+        numberOfImages: 1,
+        aspectRatio: "16:9"
       }
     };
 
@@ -35,7 +33,6 @@ serve(async (req) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${GEMINI_API_KEY}`
       },
       body: JSON.stringify(request)
     });
