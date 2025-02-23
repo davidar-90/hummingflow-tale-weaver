@@ -6,7 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 const Index = () => {
   const [storyData, setStoryData] = useState({
-    therapyGoal: ''
+    therapyGoal: '',
+    communicationLevel: ''
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -50,6 +51,27 @@ const Index = () => {
                     <SelectItem value="following-directions">Following Directions</SelectItem>
                     <SelectItem value="resolving-conflicts">Resolving Conflicts</SelectItem>
                     <SelectItem value="other">Other (Specify)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="form-group">
+                <Label htmlFor="communicationLevel" className="text-blue-900">Communication Level</Label>
+                <Select
+                  value={storyData.communicationLevel}
+                  onValueChange={(value) => handleInputChange('communicationLevel', value)}
+                >
+                  <SelectTrigger className="select-input">
+                    <SelectValue placeholder="Beginner" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pre-verbal">Pre-verbal/Non-verbal</SelectItem>
+                    <SelectItem value="emerging-language">Emerging Language (Single Words)</SelectItem>
+                    <SelectItem value="early-language">Early Language (Short Phrases)</SelectItem>
+                    <SelectItem value="basic-sentences">Basic Sentences</SelectItem>
+                    <SelectItem value="developing-sentences">Developing Sentences</SelectItem>
+                    <SelectItem value="complex-sentences">Complex Sentences</SelectItem>
+                    <SelectItem value="conversational">Conversational Language</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
