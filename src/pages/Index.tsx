@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -118,7 +117,16 @@ const Index = () => {
           therapyGoal: storyData.therapyGoal,
           communicationLevel: storyData.communicationLevel,
           supportCues: storyData.supportCues,
-          studentInterests: storyData.studentInterests
+          studentInterests: storyData.studentInterests,
+          systemInstructions: `Create an engaging social story with a positive, supportive interaction point.
+            The interaction should:
+            - Focus on practicing positive behaviors and choices
+            - Avoid depicting negative or mean behaviors
+            - Present realistic, age-appropriate scenarios
+            - Encourage empathy and understanding
+            - Maintain a supportive and encouraging tone
+            - Relate directly to the therapy goal
+            - Use language appropriate for the student's communication level`
         }
       });
 
@@ -247,19 +255,22 @@ const Index = () => {
                 </div>
               </div>
 
-              {interactionPoint && (
-                <div className="mt-8 p-6 bg-purple-50 rounded-xl border-2 border-purple-200 shadow-lg animate-fadeIn">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="bg-purple-200 p-2 rounded-full">
-                      <CheckCircle2 className="h-6 w-6 text-purple-700" />
-                    </div>
-                    <h3 className="text-xl font-semibold text-purple-900">
-                      Interaction Point
-                    </h3>
-                  </div>
-                  
+              <div className={`mt-8 p-6 rounded-xl border ${
+                interactionPoint 
+                  ? 'bg-white shadow-sm border-blue-100' 
+                  : 'bg-gray-50 border-gray-200'
+              } transition-colors duration-300`}>
+                <div className="flex items-center gap-3 mb-4">
+                  <h3 className={`text-lg font-medium ${
+                    interactionPoint ? 'text-blue-900' : 'text-gray-500'
+                  }`}>
+                    Interaction Point
+                  </h3>
+                </div>
+                
+                {interactionPoint ? (
                   <div className="space-y-4">
-                    <p className="text-purple-800 font-medium p-4 bg-white/50 rounded-lg border border-purple-100">
+                    <p className="text-gray-800 font-medium p-4 bg-gray-50 rounded-lg border border-gray-100">
                       {interactionPoint.prompt}
                     </p>
                     
@@ -271,12 +282,12 @@ const Index = () => {
                       {interactionPoint.choices.map((choice, index) => (
                         <div 
                           key={index} 
-                          className="flex items-center space-x-3 p-3 bg-white rounded-lg border border-purple-100 hover:border-purple-300 transition-colors"
+                          className="flex items-center space-x-3 p-3 bg-white rounded-lg border border-gray-200 hover:border-blue-200 hover:bg-blue-50/30 transition-all"
                         >
                           <RadioGroupItem value={index.toString()} id={`choice-${index}`} />
                           <Label 
                             htmlFor={`choice-${index}`} 
-                            className="text-purple-900 flex-1 cursor-pointer"
+                            className="text-gray-700 flex-1 cursor-pointer"
                           >
                             {choice.text}
                           </Label>
@@ -284,8 +295,14 @@ const Index = () => {
                       ))}
                     </RadioGroup>
                   </div>
-                </div>
-              )}
+                ) : (
+                  <div className="text-center py-6">
+                    <p className="text-gray-500">
+                      Generate a story to see the interaction point
+                    </p>
+                  </div>
+                )}
+              </div>
             </div>
           </Card>
 
