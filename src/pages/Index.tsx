@@ -32,6 +32,7 @@ const Index = () => {
     selectedChoice?: number;
     feedback?: { correct: string; incorrect: string };
     continuation: string;
+    continuationImagePrompt?: string;
   } | null>(null);
 
   const handleInputChange = (field: string, value: string) => {
