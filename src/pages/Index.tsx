@@ -49,8 +49,9 @@ const Index = () => {
     
     setIsGeneratingImage(true);
     try {
-      // Generate initial story image
-      const storyPrompt = storyData.imagePrompt || storyData.storyContent;
+      // Generate initial story image with enhanced prompt
+      const baseStyle = "Professional storybook illustration style, cohesive character design, modern aesthetic, soft lighting, detailed environment";
+      const storyPrompt = `${baseStyle}. Scene: ${storyData.imagePrompt || storyData.storyContent}`;
       console.log('Using story image prompt:', storyPrompt);
       
       const { data: storyImageData, error: storyImageError } = await supabase.functions.invoke('generate-image', {
@@ -69,7 +70,8 @@ const Index = () => {
 
       // Generate continuation image if available
       if (storyData.continuationImagePrompt) {
-        const continuationPrompt = storyData.continuationImagePrompt;
+        // Use the same style and character descriptions for consistency
+        const continuationPrompt = `${baseStyle}. Scene: ${storyData.continuationImagePrompt}. Maintain consistent character appearance and style as the previous image`;
         console.log('Using continuation image prompt:', continuationPrompt);
         
         const { data: continuationImageData, error: continuationImageError } = await supabase.functions.invoke('generate-image', {
