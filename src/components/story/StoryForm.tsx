@@ -1,10 +1,9 @@
-
 import { useState } from 'react';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Sparkles } from "lucide-react";
+import { Sparkles, ImageIcon, MicIcon } from "lucide-react";
 import { toast } from "sonner";
 import { StoryData } from '@/types/story';
 
@@ -29,6 +28,8 @@ export const StoryForm = ({
   isGeneratingImage,
   onClearStory
 }: StoryFormProps) => {
+  const hasStory = Boolean(storyData.storyContent);
+
   return (
     <div className="space-y-6">
       <div className="form-group">
@@ -140,20 +141,29 @@ export const StoryForm = ({
           </Button>
 
           <Button 
-            className="flex-1 bg-purple-600 hover:bg-purple-700 text-white py-6 rounded-xl shadow-md transition-colors duration-200"
+            className={`flex-1 py-6 rounded-xl shadow-md transition-colors duration-200 ${
+              hasStory 
+                ? 'bg-purple-600 hover:bg-purple-700 text-white' 
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            }`}
             onClick={onGenerateImage}
-            disabled={isGeneratingImage}
+            disabled={!hasStory || isGeneratingImage}
           >
             {isGeneratingImage ? 'Generating...' : 'Generate Image'}
-            <Sparkles className="ml-2 h-5 w-5" />
+            <ImageIcon className="ml-2 h-5 w-5" />
           </Button>
 
           <Button 
-            className="flex-1 bg-green-600 hover:bg-green-700 text-white py-6 rounded-xl shadow-md transition-colors duration-200"
+            className={`flex-1 py-6 rounded-xl shadow-md transition-colors duration-200 ${
+              hasStory 
+                ? 'bg-green-600 hover:bg-green-700 text-white' 
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            }`}
             onClick={onGenerateVoice}
+            disabled={!hasStory}
           >
             Generate Voice
-            <Sparkles className="ml-2 h-5 w-5" />
+            <MicIcon className="ml-2 h-5 w-5" />
           </Button>
         </div>
       </div>
