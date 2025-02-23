@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,7 +10,6 @@ import { StoryData, InteractionPointType } from '@/types/story';
 import { useStoryGeneration } from "@/hooks/useStoryGeneration";
 import { useImageGeneration } from "@/hooks/useImageGeneration";
 import { useVoiceGeneration } from "@/hooks/useVoiceGeneration";
-import { StoryAudioPlayer } from "@/components/story/StoryAudioPlayer";
 
 const Index = () => {
   const initialStoryData: StoryData = {
@@ -173,10 +171,8 @@ const Index = () => {
               storyData={storyData}
               interactionPoint={interactionPoint}
               onInputChange={handleInputChange}
-            />
-            <StoryAudioPlayer
               audioContent={audioContent}
-              isGenerating={isGeneratingVoice}
+              isGeneratingVoice={isGeneratingVoice}
             />
           </Card>
         </div>

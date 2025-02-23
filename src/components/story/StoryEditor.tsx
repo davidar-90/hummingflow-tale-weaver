@@ -9,14 +9,25 @@ interface StoryEditorProps {
   storyData: StoryData;
   interactionPoint: InteractionPointType | null;
   onInputChange: (field: string, value: string) => void;
+  audioContent?: string | null;
+  isGeneratingVoice?: boolean;
 }
 
-export const StoryEditor = ({ storyData, interactionPoint, onInputChange }: StoryEditorProps) => {
+export const StoryEditor = ({ 
+  storyData, 
+  interactionPoint, 
+  onInputChange,
+  audioContent,
+  isGeneratingVoice 
+}: StoryEditorProps) => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-4">
         <Label htmlFor="storyTitle" className="text-blue-900">Title</Label>
-        <StoryAudioPlayer />
+        <StoryAudioPlayer 
+          audioContent={audioContent}
+          isGenerating={isGeneratingVoice}
+        />
       </div>
 
       <div className="form-group">
