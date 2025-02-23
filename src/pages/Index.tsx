@@ -9,6 +9,7 @@ const Index = () => {
   const [storyData, setStoryData] = useState({
     therapyGoal: '',
     communicationLevel: '',
+    supportCues: '',
     studentInterests: ''
   });
 
@@ -74,6 +75,27 @@ const Index = () => {
                     <SelectItem value="developing-sentences">Developing Sentences</SelectItem>
                     <SelectItem value="complex-sentences">Complex Sentences</SelectItem>
                     <SelectItem value="conversational">Conversational Language</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="form-group">
+                <Label htmlFor="supportCues" className="text-blue-900">Support Cues (Optional)</Label>
+                <Select
+                  value={storyData.supportCues}
+                  onValueChange={(value) => handleInputChange('supportCues', value)}
+                >
+                  <SelectTrigger className="select-input">
+                    <SelectValue placeholder="None (Optional)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">None (Optional)</SelectItem>
+                    <SelectItem value="visual">Visual Cues</SelectItem>
+                    <SelectItem value="verbal">Verbal Prompts</SelectItem>
+                    <SelectItem value="breathing">Deep Breaths</SelectItem>
+                    <SelectItem value="first-then">First-Then Structure</SelectItem>
+                    <SelectItem value="social-rules">Social Rule Focus</SelectItem>
+                    <SelectItem value="emotion-words">Emotion Words</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
