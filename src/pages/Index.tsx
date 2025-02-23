@@ -102,7 +102,7 @@ const Index = () => {
 
       if (error) throw error;
 
-      const { title, content, interactionPoint } = cleanAndParseResponse(data);
+      const { title, content, imagePrompt, interactionPoint } = cleanAndParseResponse(data);
 
       setStoryData(prev => ({
         ...prev,
@@ -112,7 +112,7 @@ const Index = () => {
 
       setInteractionPoint(interactionPoint);
 
-      await generateImage(`Create a scene that illustrates this story: ${content}`);
+      await generateImage(imagePrompt);
 
       toast.success("Story generated successfully!");
     } catch (error) {
@@ -139,8 +139,8 @@ const Index = () => {
       duration: 5000
     });
 
-    if (interactionPoint.continuation) {
-      await generateImage(`Create a scene that illustrates this story continuation: ${interactionPoint.continuation}`, false);
+    if (interactionPoint.continuation && interactionPoint.continuationImagePrompt) {
+      await generateImage(interactionPoint.continuationImagePrompt, false);
     }
   };
 
@@ -178,18 +178,31 @@ const Index = () => {
         .replace(/^["']|["']$/g, '')
         .trim();
 
-      console.log('Cleaned data:', { title, content, interactionPoint: data.interactionPoint });
+      console.log('Cleaned data:', { 
+        title, 
+        content, 
+        imagePrompt: data.imagePrompt,
+        interactionPoint: {
+          ...data.interactionPoint,
+          continuationImagePrompt: data.interactionPoint?.continuationImagePrompt
+        }
+      });
 
       return { 
         title, 
-        content, 
-        interactionPoint: data.interactionPoint 
+        content,
+        imagePrompt: data.imagePrompt,
+        interactionPoint: {
+          ...data.interactionPoint,
+          continuationImagePrompt: data.interactionPoint?.continuationImagePrompt
+        }
       };
     } catch (error) {
       console.error('Error parsing response:', error);
       return {
         title: 'Error parsing title',
         content: 'There was an error processing the story. Please try again.',
+        imagePrompt: '',
         interactionPoint: null
       };
     }
