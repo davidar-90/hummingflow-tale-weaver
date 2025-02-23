@@ -50,8 +50,8 @@ Format the response as a JSON object with:
   "content": "The full story text"
 }`
 
-    // Call Gemini API with the correct model
-    const response = await fetch('https://generativelanguage.googleapis.com/v1/models/gemini-1.0-pro:generateContent', {
+    // Call Gemini API with Flash-Lite model
+    const response = await fetch('https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash-lite:generateContent', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
