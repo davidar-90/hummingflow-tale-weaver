@@ -248,10 +248,20 @@ const Index = () => {
               </div>
 
               {interactionPoint && (
-                <div className="border-t pt-8">
-                  <h3 className="text-xl font-semibold text-blue-900 mb-4">Interaction Point</h3>
+                <div className="mt-8 p-6 bg-purple-50 rounded-xl border-2 border-purple-200 shadow-lg animate-fadeIn">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="bg-purple-200 p-2 rounded-full">
+                      <CheckCircle2 className="h-6 w-6 text-purple-700" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-purple-900">
+                      Interaction Point
+                    </h3>
+                  </div>
+                  
                   <div className="space-y-4">
-                    <p className="text-blue-800 font-medium">{interactionPoint.prompt}</p>
+                    <p className="text-purple-800 font-medium p-4 bg-white/50 rounded-lg border border-purple-100">
+                      {interactionPoint.prompt}
+                    </p>
                     
                     <RadioGroup
                       className="space-y-3"
@@ -259,9 +269,15 @@ const Index = () => {
                       onValueChange={(value) => handleChoiceSelection(parseInt(value))}
                     >
                       {interactionPoint.choices.map((choice, index) => (
-                        <div key={index} className="flex items-center space-x-2">
+                        <div 
+                          key={index} 
+                          className="flex items-center space-x-3 p-3 bg-white rounded-lg border border-purple-100 hover:border-purple-300 transition-colors"
+                        >
                           <RadioGroupItem value={index.toString()} id={`choice-${index}`} />
-                          <Label htmlFor={`choice-${index}`} className="text-gray-700">
+                          <Label 
+                            htmlFor={`choice-${index}`} 
+                            className="text-purple-900 flex-1 cursor-pointer"
+                          >
                             {choice.text}
                           </Label>
                         </div>
