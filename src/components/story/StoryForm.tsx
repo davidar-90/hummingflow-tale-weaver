@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -127,7 +128,7 @@ export const StoryForm = ({
           placeholder="e.g., space, dinosaurs"
           value={storyData.studentInterests}
           onChange={(e) => onInputChange('studentInterests', e.target.value)}
-          className={`text-input ${storyData.studentInterests ? 'text-black' : 'text-gray-500'}`}
+          className="text-input"
         />
       </div>
 
