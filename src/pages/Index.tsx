@@ -49,9 +49,19 @@ const Index = () => {
     
     setIsGeneratingImage(true);
     try {
-      // Generate initial story image with enhanced prompt
-      const baseStyle = "Professional storybook illustration style, cohesive character design, modern aesthetic, soft lighting, detailed environment";
-      const storyPrompt = `${baseStyle}. Scene: ${storyData.imagePrompt || storyData.storyContent}`;
+      // Extract character descriptions and setting from the story
+      const characters = storyData.storyContent.match(/[A-Z][a-z]+(?=\s(?:was|were|and|is|had|looked))/g) || [];
+      const uniqueCharacters = [...new Set(characters)];
+      const characterContext = uniqueCharacters.length > 0 
+        ? `Main characters: ${uniqueCharacters.join(', ')}. `
+        : '';
+
+      // Define consistent style and setting
+      const baseStyle = "Professional storybook illustration style, modern aesthetic, soft lighting, detailed environment";
+      const artDirection = "Use vibrant colors, dynamic composition, and consistent character designs throughout";
+      
+      // Generate initial story image with enhanced context
+      const storyPrompt = `${baseStyle}. ${characterContext}Scene: ${storyData.imagePrompt || storyData.storyContent}. ${artDirection}`;
       console.log('Using story image prompt:', storyPrompt);
       
       const { data: storyImageData, error: storyImageError } = await supabase.functions.invoke('generate-image', {
@@ -70,8 +80,8 @@ const Index = () => {
 
       // Generate continuation image if available
       if (storyData.continuationImagePrompt) {
-        // Use the same style and character descriptions for consistency
-        const continuationPrompt = `${baseStyle}. Scene: ${storyData.continuationImagePrompt}. Maintain consistent character appearance and style as the previous image`;
+        // Pass the same character and style context for consistency
+        const continuationPrompt = `${baseStyle}. ${characterContext}Scene: ${storyData.continuationImagePrompt}. ${artDirection}. Maintain exact same character appearances, clothing, and art style as the previous image for consistency.`;
         console.log('Using continuation image prompt:', continuationPrompt);
         
         const { data: continuationImageData, error: continuationImageError } = await supabase.functions.invoke('generate-image', {
