@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent';
-const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY2');
+const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
