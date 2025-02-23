@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Index = () => {
@@ -11,7 +12,8 @@ const Index = () => {
     communicationLevel: '',
     supportCues: '',
     studentInterests: '',
-    storyTitle: ''
+    storyTitle: '',
+    storyContent: ''
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -131,11 +133,15 @@ const Index = () => {
                 />
               </div>
               
-              <div className="h-full flex items-center justify-center text-blue-400">
-                <p className="text-center">
-                  Story editor coming soon...<br/>
-                  <span className="text-sm opacity-75">Your stories will come to life here</span>
-                </p>
+              <div className="form-group">
+                <Label htmlFor="storyContent" className="text-blue-900">Story Content</Label>
+                <Textarea
+                  id="storyContent"
+                  placeholder="Story content will appear here..."
+                  value={storyData.storyContent}
+                  onChange={(e) => handleInputChange('storyContent', e.target.value)}
+                  className="min-h-[400px] text-input resize-none bg-white/50"
+                />
               </div>
             </div>
           </Card>
