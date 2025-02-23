@@ -45,11 +45,6 @@ const Index = () => {
       toast.error("Please generate a story first");
       return;
     }
-
-    if (!interactionPoint?.selectedChoice !== undefined) {
-      toast.error("Please select an interaction choice first");
-      return;
-    }
     
     setIsGeneratingImage(true);
     try {
@@ -71,7 +66,7 @@ const Index = () => {
         storyImage: storyImageData.imageUrl
       }));
 
-      // Generate continuation image
+      // Generate continuation image if available
       if (storyData.continuationImagePrompt) {
         const continuationPrompt = storyData.continuationImagePrompt;
         console.log('Using continuation image prompt:', continuationPrompt);
