@@ -6,6 +6,21 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// Process buffer in chunks to prevent stack overflow
+function arrayBufferToBase64(buffer: ArrayBuffer) {
+  const bytes = new Uint8Array(buffer);
+  const chunkSize = 0xffff; // Maximum size that can be processed at once
+  let binary = '';
+  
+  // Process the buffer in chunks
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    const chunk = bytes.slice(i, i + chunkSize);
+    binary += String.fromCharCode.apply(null, chunk as unknown as number[]);
+  }
+  
+  return btoa(binary);
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -48,9 +63,9 @@ serve(async (req) => {
       throw new Error(`ElevenLabs API error: ${errorText}`);
     }
 
-    // Convert audio buffer to base64
-    const arrayBuffer = await response.arrayBuffer()
-    const base64Audio = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)))
+    // Convert audio buffer to base64 using chunked processing
+    const arrayBuffer = await response.arrayBuffer();
+    const base64Audio = arrayBufferToBase64(arrayBuffer);
 
     return new Response(
       JSON.stringify({ audioContent: base64Audio }),
@@ -64,7 +79,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
-        status: 200, // Changed from 500 to 200 to avoid the non-2xx error
+        status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
     )
