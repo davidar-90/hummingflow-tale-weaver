@@ -31,7 +31,6 @@ serve(async (req) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Accept': 'application/json'
       },
       body: JSON.stringify([
         {
@@ -42,7 +41,7 @@ serve(async (req) => {
           taskType: "imageInference",
           taskUUID: crypto.randomUUID(),
           positivePrompt: `Generate an image with a dynamic, stylized animation aesthetic, reminiscent of a modern comic book or graphic novel: ${prompt}. Employ vibrant, saturated colors with layered, textured overlays and halftone patterns. Use strong, exaggerated motion blur and speed lines to convey kinetic energy. Incorporate bold ink lines and fragmented imagery, with a focus on dynamic perspective. The overall feel should be energetic and visually diverse, similar to a pop art inspired animation.`,
-          model: "runware:flux1@1",
+          model: "runware:100@1",
           width: WIDTH,
           height: HEIGHT,
           numberResults: 1,
@@ -54,27 +53,18 @@ serve(async (req) => {
       ])
     });
 
-    let data;
-    try {
-      const text = await response.text(); // First get response as text
-      console.log('[Debug] Raw response:', text);
-      data = JSON.parse(text); // Then parse it as JSON
-    } catch (parseError) {
-      console.error('[Debug] JSON parsing error:', parseError);
-      throw new Error(`Failed to parse response: ${parseError.message}`);
-    }
-
     if (!response.ok) {
-      console.error('[Debug] API error response:', data);
-      throw new Error(`Failed to generate image: ${response.statusText}`);
+      const errorText = await response.text();
+      console.error('[Debug] Runware API error:', errorText);
+      throw new Error(`Failed to generate image: ${response.statusText} - ${errorText}`);
     }
 
+    const data = await response.json();
     console.log('[Debug] Success response:', JSON.stringify(data, null, 2));
 
     // Extract the image URL from the response
-    const imageData = data.data?.find((item: any) => item.taskType === "imageInference");
-    if (!imageData?.imageURL) {
-      console.error('[Debug] No image data found in response:', data);
+    const imageData = data.data.find((item: any) => item.taskType === "imageInference");
+    if (!imageData || !imageData.imageURL) {
       throw new Error('No image URL in response');
     }
 
