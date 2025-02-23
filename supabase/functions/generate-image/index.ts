@@ -6,7 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const VERTEX_AI_URL = 'https://us-central1-aiplatform.googleapis.com/v1/projects/imagen/locations/us-central1/publishers/google/models/imagegeneration:generateImage';
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-pro-vision:generateContent';
 const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
 
 serve(async (req) => {
@@ -20,22 +20,24 @@ serve(async (req) => {
     console.log('[Debug] Received prompt:', prompt);
 
     const request = {
-      instances: [{
-        prompt: `High quality digital illustration in a friendly children's book style: ${prompt}`
+      contents: [{
+        parts: [{
+          text: `Generate an image: High quality digital illustration in a friendly children's book style: ${prompt}`
+        }]
       }],
-      parameters: {
-        sampleCount: 1,
-        aspectRatio: "16:9"
+      generationConfig: {
+        temperature: 0.9,
+        topK: 32,
+        topP: 1
       }
     };
 
     console.log('[Debug] Request payload:', JSON.stringify(request, null, 2));
 
-    const response = await fetch(VERTEX_AI_URL, {
+    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${GEMINI_API_KEY}`
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(request)
     });
