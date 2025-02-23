@@ -84,7 +84,12 @@ const Index = () => {
     }
     
     try {
-      await generateVoice(storyData.storyContent);
+      // Combine story content with continuation if it exists
+      const fullStoryText = interactionPoint?.continuation 
+        ? `${storyData.storyContent}\n\n${interactionPoint.continuation}`
+        : storyData.storyContent;
+
+      await generateVoice(fullStoryText);
       toast.success("Voice generated successfully!");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to generate voice. Please try again.");
