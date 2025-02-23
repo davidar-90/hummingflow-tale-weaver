@@ -10,87 +10,131 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+async function generateStoryContent(params: any) {
+  const response = await fetch(`${GENAI_API_URL}?key=${GEMINI_API_KEY}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      contents: [{
+        parts: [{
+          text: `Create an engaging social story with a title, content, and an interaction point.
+
+          Response format should be JSON with:
+          {
+            "title": "story title",
+            "content": "main story content",
+            "interactionPoint": {
+              "prompt": "interaction question",
+              "choices": [{"text": "choice text", "isCorrect": boolean}],
+              "feedback": {"correct": "feedback", "incorrect": "feedback"},
+              "continuation": "story continuation"
+            }
+          }
+
+          Story parameters:
+          - Therapy goal: ${params.therapyGoal}
+          - Age group: ${params.ageGroup}
+          - Communication level: ${params.communicationLevel}
+          - Support cues: ${params.supportCues || 'none'}
+          - Student interests: ${params.studentInterests}
+          
+          Additional instructions:
+          ${params.systemInstructions}`
+        }]
+      }]
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to generate story content: ${response.statusText}`);
+  }
+
+  const geminiResponse = await response.json();
+  const jsonContent = geminiResponse.candidates[0].content.parts[0].text;
+  const cleanJson = jsonContent.replace(/```json\n|\n```/g, '').trim();
+  return JSON.parse(cleanJson);
+}
+
+async function generateImagePrompt(title: string, content: string, isInitial: boolean = true) {
+  const response = await fetch(`${GENAI_API_URL}?key=${GEMINI_API_KEY}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      contents: [{
+        parts: [{
+          text: `Create a detailed image prompt for the following ${isInitial ? 'story' : 'story continuation'}:
+
+          Title: ${title}
+          ${isInitial ? 'Content' : 'Continuation'}: ${content}
+
+          Guidelines for the image prompt:
+          - Be specific and detailed about what should be in the scene
+          - Focus on the main action or emotion of the story
+          - Describe visual elements like lighting, perspective, and style
+          - Specify it should be in a friendly, children's illustration style
+          - Include mood and atmosphere descriptions
+          
+          Return ONLY the image prompt text, no additional formatting or explanation.`
+        }]
+      }]
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to generate image prompt: ${response.statusText}`);
+  }
+
+  const geminiResponse = await response.json();
+  return geminiResponse.candidates[0].content.parts[0].text.trim();
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const { therapyGoal, ageGroup, communicationLevel, supportCues, studentInterests, systemInstructions } = await req.json();
+    const params = await req.json();
+    
+    // Step 1: Generate the story content
+    const storyData = await generateStoryContent(params);
+    console.log('Story data generated:', storyData);
 
-    const response = await fetch(`${GENAI_API_URL}?key=${GEMINI_API_KEY}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: `Create a social story with a title, content, interaction point, and an image prompt following Imagen best practices.
-            
-            Guidelines for the image prompt:
-            - Be specific and detailed about what should be in the scene
-            - Focus on the main action or emotion of the story
-            - Describe visual elements like lighting, perspective, and style
-            - Specify it should be in a friendly, children's illustration style
-            - Include mood and atmosphere descriptions
-            
-            Response format should be JSON with:
-            {
-              "title": "story title",
-              "content": "main story content",
-              "imagePrompt": "detailed scene description following Imagen guidelines",
-              "interactionPoint": {
-                "prompt": "interaction question",
-                "choices": [{"text": "choice text", "isCorrect": boolean}],
-                "feedback": {"correct": "feedback", "incorrect": "feedback"},
-                "continuation": "story continuation",
-                "continuationImagePrompt": "detailed scene description for continuation"
-              }
-            }
+    // Step 2: Generate the image prompt for the initial story
+    const imagePrompt = await generateImagePrompt(storyData.title, storyData.content);
+    console.log('Initial image prompt:', imagePrompt);
 
-            Story parameters:
-            - Therapy goal: ${therapyGoal}
-            - Age group: ${ageGroup}
-            - Communication level: ${communicationLevel}
-            - Support cues: ${supportCues || 'none'}
-            - Student interests: ${studentInterests}
-            
-            Additional instructions:
-            ${systemInstructions}`
-          }]
-        }]
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to generate story: ${response.statusText}`);
+    // Step 3: If there's a continuation, generate its image prompt
+    let continuationImagePrompt = '';
+    if (storyData.interactionPoint?.continuation) {
+      continuationImagePrompt = await generateImagePrompt(
+        storyData.title,
+        storyData.interactionPoint.continuation,
+        false
+      );
+      console.log('Continuation image prompt:', continuationImagePrompt);
     }
 
-    const geminiResponse = await response.json();
-    console.log('Gemini API Response:', JSON.stringify(geminiResponse, null, 2));
+    // Combine all data
+    const finalData = {
+      ...storyData,
+      imagePrompt,
+      interactionPoint: storyData.interactionPoint ? {
+        ...storyData.interactionPoint,
+        continuationImagePrompt
+      } : null
+    };
 
-    if (!geminiResponse.candidates?.[0]?.content?.parts?.[0]?.text) {
-      throw new Error('Invalid response format from Gemini API');
-    }
-
-    // Extract the JSON string from the response and parse it
-    const jsonContent = geminiResponse.candidates[0].content.parts[0].text;
-    console.log('Raw JSON content:', jsonContent);
-    
-    // Remove markdown code block syntax if present
-    const cleanJson = jsonContent.replace(/```json\n|\n```/g, '').trim();
-    console.log('Cleaned JSON:', cleanJson);
-    
-    const storyData = JSON.parse(cleanJson);
-    console.log('Parsed story data:', storyData);
-
-    // Validate required fields
-    if (!storyData.title || !storyData.content || !storyData.imagePrompt || !storyData.interactionPoint) {
+    // Validate the final data
+    if (!finalData.title || !finalData.content || !finalData.imagePrompt || !finalData.interactionPoint) {
       throw new Error('Generated story is missing required fields');
     }
 
-    return new Response(JSON.stringify(storyData), {
+    return new Response(JSON.stringify(finalData), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
