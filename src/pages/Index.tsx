@@ -13,6 +13,7 @@ import { toast } from "sonner";
 const Index = () => {
   const initialStoryData = {
     therapyGoal: '',
+    ageGroup: '',
     communicationLevel: '',
     supportCues: '',
     studentInterests: '',
@@ -112,7 +113,7 @@ const Index = () => {
   };
 
   const generateStory = async () => {
-    if (!storyData.therapyGoal || !storyData.communicationLevel || !storyData.studentInterests) {
+    if (!storyData.therapyGoal || !storyData.ageGroup || !storyData.communicationLevel || !storyData.studentInterests) {
       toast.error("Please fill in all required fields");
       return;
     }
@@ -122,6 +123,7 @@ const Index = () => {
       const { data, error } = await supabase.functions.invoke('generate-story', {
         body: {
           therapyGoal: storyData.therapyGoal,
+          ageGroup: storyData.ageGroup,
           communicationLevel: storyData.communicationLevel,
           supportCues: storyData.supportCues,
           studentInterests: storyData.studentInterests,
@@ -129,7 +131,8 @@ const Index = () => {
             The interaction should:
             - Focus on practicing positive behaviors and choices
             - Avoid depicting negative or mean behaviors
-            - Present realistic, age-appropriate scenarios
+            - Present realistic, age-appropriate scenarios for ${storyData.ageGroup}
+            - Use vocabulary and concepts appropriate for ${storyData.ageGroup}
             - Encourage empathy and understanding
             - Maintain a supportive and encouraging tone
             - Relate directly to the therapy goal
@@ -205,6 +208,27 @@ const Index = () => {
                         <SelectItem value="following-directions">Following Directions</SelectItem>
                         <SelectItem value="resolving-conflicts">Resolving Conflicts</SelectItem>
                         <SelectItem value="other">Other (Specify)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="form-group">
+                    <Label htmlFor="ageGroup" className="text-blue-900">Age Group / Grade Level *</Label>
+                    <Select
+                      value={storyData.ageGroup}
+                      onValueChange={(value) => handleInputChange('ageGroup', value)}
+                    >
+                      <SelectTrigger className="select-input">
+                        <SelectValue placeholder="Select age group..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="preschool">Preschool (3-5 years)</SelectItem>
+                        <SelectItem value="kindergarten">Kindergarten (5-6 years)</SelectItem>
+                        <SelectItem value="early-elementary">Early Elementary (Grades 1-2)</SelectItem>
+                        <SelectItem value="upper-elementary">Upper Elementary (Grades 3-5)</SelectItem>
+                        <SelectItem value="middle-school">Middle School (Grades 6-8)</SelectItem>
+                        <SelectItem value="high-school">High School (Grades 9-12)</SelectItem>
+                        <SelectItem value="young-adult">Young Adult (18-21 years)</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
