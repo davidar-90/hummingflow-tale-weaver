@@ -27,6 +27,17 @@ export const StoryEditor = ({ storyData, interactionPoint, onInputChange }: Stor
       
       <div className="space-y-4">
         <div className="form-group">
+          <Label htmlFor="storyContent" className="text-blue-900">Story Content</Label>
+          <Textarea
+            id="storyContent"
+            placeholder="Story content will appear here..."
+            value={storyData.storyContent}
+            onChange={(e) => onInputChange('storyContent', e.target.value)}
+            className={`min-h-[200px] text-input resize-none bg-white/50 ${storyData.storyContent ? 'text-black' : 'text-gray-500'} whitespace-pre-wrap`}
+          />
+        </div>
+
+        <div className="form-group">
           <Label className="text-blue-900">Story Image</Label>
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50 flex flex-col items-center justify-center aspect-video w-full">
             {storyData.storyImage ? (
@@ -42,21 +53,20 @@ export const StoryEditor = ({ storyData, interactionPoint, onInputChange }: Stor
             )}
           </div>
         </div>
-
-        <div className="form-group">
-          <Label htmlFor="storyContent" className="text-blue-900">Story Content</Label>
-          <Textarea
-            id="storyContent"
-            placeholder="Story content will appear here..."
-            value={storyData.storyContent}
-            onChange={(e) => onInputChange('storyContent', e.target.value)}
-            className={`min-h-[200px] text-input resize-none bg-white/50 ${storyData.storyContent ? 'text-black' : 'text-gray-500'} whitespace-pre-wrap`}
-          />
-        </div>
       </div>
 
       {interactionPoint?.selectedChoice !== undefined && (
         <div className="space-y-4">
+          <div className="form-group">
+            <Label htmlFor="continuation" className="text-blue-900">Story Continuation</Label>
+            <Textarea
+              id="continuation"
+              value={interactionPoint.continuation}
+              readOnly
+              className="min-h-[200px] text-input resize-none bg-white/50 text-black whitespace-pre-wrap"
+            />
+          </div>
+
           <div className="form-group">
             <Label className="text-blue-900">Continuation Image</Label>
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50 flex flex-col items-center justify-center aspect-video w-full">
@@ -72,16 +82,6 @@ export const StoryEditor = ({ storyData, interactionPoint, onInputChange }: Stor
                 </div>
               )}
             </div>
-          </div>
-
-          <div className="form-group">
-            <Label htmlFor="continuation" className="text-blue-900">Story Continuation</Label>
-            <Textarea
-              id="continuation"
-              value={interactionPoint.continuation}
-              readOnly
-              className="min-h-[200px] text-input resize-none bg-white/50 text-black whitespace-pre-wrap"
-            />
           </div>
         </div>
       )}
