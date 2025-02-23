@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, Feather } from "lucide-react";
 import { toast } from "sonner";
 import { StoryForm } from "@/components/story/StoryForm";
 import { InteractionPoint } from "@/components/story/InteractionPoint";
@@ -124,9 +124,12 @@ const Index = () => {
     <div className="min-h-screen">
       <div className="container mx-auto py-12 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto text-center mb-16">
-          <h1 className="text-5xl md:text-6xl font-bold mb-4 hero-gradient tracking-tight">
-            HummingFlow Studio
-          </h1>
+          <div className="flex items-center justify-center gap-4 mb-4">
+            <Feather className="w-12 h-12 text-blue-500" strokeWidth={1.5} />
+            <h1 className="text-5xl md:text-6xl font-bold hero-gradient tracking-tight">
+              HummingFlow Studio
+            </h1>
+          </div>
           <p className="text-lg md:text-xl hero-subtitle">
             Create engaging social stories that make a difference
           </p>
