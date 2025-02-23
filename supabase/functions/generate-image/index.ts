@@ -40,10 +40,10 @@ serve(async (req) => {
         {
           taskType: "imageInference",
           taskUUID: crypto.randomUUID(),
-          positivePrompt: `High quality digital illustration in a friendly children's book style: ${prompt}`,
-          model: "runware:100@1", // Using runware:100@1 for stable, high-quality children's book style illustrations
+          positivePrompt: `Modern digital art in Spider-Verse animation style: ${prompt}. Dynamic lighting, bold colors, comic book aesthetic, crisp line work, stylized realism, dramatic angles, subtle cel-shading. Maintain sophisticated design with high attention to detail and modern artistic sensibilities.`,
+          model: "runware:100@1",
           width: WIDTH,
-          height: HEIGHT, // Using 16:9 aspect ratio
+          height: HEIGHT,
           numberResults: 1,
           outputFormat: "WEBP",
           CFGScale: 1,
