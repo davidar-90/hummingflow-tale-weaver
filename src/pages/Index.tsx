@@ -28,16 +28,16 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
       <div className="container mx-auto py-12">
-        <h1 className="text-4xl md:text-5xl font-bold text-center mb-2 hero-gradient">
+        <h1 className="text-4xl md:text-5xl font-bold text-center mb-2 hero-gradient animate-fadeIn">
           HummingFlow Studio
         </h1>
-        <p className="text-center text-blue-600/80 mb-12">
+        <p className="text-center text-blue-600/80 mb-12 animate-fadeIn">
           Create engaging social stories that make a difference
         </p>
         
         <div className="split-panel">
           {/* Story Setup Panel */}
-          <Card className="glass-card p-8">
+          <Card className="glass-card p-8 animate-slideIn">
             <h2 className="text-2xl font-semibold text-blue-900 mb-8">Story Setup</h2>
             
             <div className="space-y-6">
@@ -127,7 +127,7 @@ const Index = () => {
           </Card>
 
           {/* Story Editor Panel */}
-          <Card className="glass-card p-8">
+          <Card className="glass-card p-8 animate-slideIn">
             <h2 className="text-2xl font-semibold text-blue-900 mb-8">Story Editor</h2>
             <div className="space-y-6">
               <div className="form-group">
