@@ -7,6 +7,28 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Helper function to clean and parse JSON from the story content
+const parseStoryContent = (content: string) => {
+  try {
+    // Remove any markdown code block syntax
+    let cleanContent = content.replace(/```json\s*|\s*```/g, '');
+    
+    // Remove any non-printable characters and control characters
+    cleanContent = cleanContent.replace(/[\x00-\x1F\x7F-\x9F]/g, '');
+    
+    // Try to find JSON-like structure if the content isn't pure JSON
+    const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      cleanContent = jsonMatch[0];
+    }
+
+    return JSON.parse(cleanContent);
+  } catch (error) {
+    console.error('JSON parsing error:', error);
+    throw new Error('Failed to parse story content: ' + error.message);
+  }
+};
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -20,27 +42,25 @@ serve(async (req) => {
     const requestData = await req.json();
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
 
-    console.log('API Key available:', !!GEMINI_API_KEY);
+    console.log('[Debug] API Key available:', !!GEMINI_API_KEY);
 
     if (!GEMINI_API_KEY) {
-      console.error('Missing Gemini API key');
-      return new Response(
-        JSON.stringify({ error: 'API key not configured' }),
-        { 
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
+      throw new Error('API key not configured');
     }
 
-    const messages: CreateChatCompletionRequestMessage[] = [
-      {
-        role: 'user' as ChatRole,
-        content: `Create a social story focusing on ${requestData.therapyGoal} for a ${requestData.ageGroup} student with ${requestData.communicationLevel} communication level. Their interests include: ${requestData.studentInterests}. ${requestData.systemInstructions}`
-      }
-    ];
+    const prompt = `Create a social story focusing on ${requestData.therapyGoal} for a ${requestData.ageGroup} student with ${requestData.communicationLevel} communication level. Their interests include: ${requestData.studentInterests}. 
 
-    console.log('Making request to Gemini API...');
+Please respond with a JSON object in this exact format:
+{
+  "title": "Story Title Here",
+  "content": "Main story content here...",
+  "imagePrompt": "Detailed scene description for illustration"
+}
+
+Make sure the story is age-appropriate, engaging, and focuses on the therapy goal while incorporating the student's interests.`;
+
+    console.log('[Debug] Sending prompt to Gemini:', prompt);
+
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
     
     const response = await fetch(apiUrl, {
@@ -51,7 +71,7 @@ serve(async (req) => {
       body: JSON.stringify({
         contents: [{
           parts: [{
-            text: messages[0].content
+            text: prompt
           }]
         }],
         generationConfig: {
@@ -82,43 +102,21 @@ serve(async (req) => {
     });
 
     const data = await response.json();
-    console.log('Raw API response:', JSON.stringify(data, null, 2));
+    console.log('[Debug] Raw API response:', JSON.stringify(data, null, 2));
 
-    if (!response.ok) {
-      console.error('API request failed:', data);
-      return new Response(
-        JSON.stringify({ 
-          error: 'Failed to generate story',
-          details: data
-        }),
-        { 
-          status: response.status,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
+    if (!response.ok || !data.candidates?.[0]?.content?.parts?.[0]?.text) {
+      throw new Error('Invalid response from Gemini API');
     }
 
     const storyContent = data.candidates[0].content.parts[0].text;
-    console.log('Generated story content:', storyContent);
+    console.log('[Debug] Generated story content:', storyContent);
 
-    // Try to parse the story content as JSON
-    let parsedStory;
-    try {
-      const cleanContent = storyContent.replace(/```json\s*|\s*```/g, '').trim();
-      parsedStory = JSON.parse(cleanContent);
-    } catch (error) {
-      console.error('Failed to parse story JSON:', error);
-      return new Response(
-        JSON.stringify({ 
-          error: 'Invalid story format received from API',
-          details: error.message,
-          content: storyContent
-        }),
-        { 
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
+    // Parse the story content with our enhanced parser
+    const parsedStory = parseStoryContent(storyContent);
+    
+    // Validate the parsed story structure
+    if (!parsedStory.title || !parsedStory.content || !parsedStory.imagePrompt) {
+      throw new Error('Invalid story format: missing required fields');
     }
 
     return new Response(
@@ -130,11 +128,11 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Unexpected error:', error);
+    console.error('[Debug] Error:', error);
     return new Response(
       JSON.stringify({ 
-        error: 'Internal server error',
-        details: error.message
+        error: error.message || 'Internal server error',
+        details: error.stack
       }),
       { 
         status: 500,
