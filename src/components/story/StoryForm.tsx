@@ -132,9 +132,9 @@ export const StoryForm = ({
       </div>
 
       <div className="form-group">
-        <div className="flex flex-wrap gap-4">
+        <div className="button-container">
           <Button 
-            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-6 rounded-xl shadow-md transition-colors duration-200"
+            className="action-button bg-blue-600 hover:bg-blue-700 text-white"
             onClick={onGenerateStory}
             disabled={isGenerating}
           >
@@ -143,7 +143,7 @@ export const StoryForm = ({
           </Button>
 
           <Button 
-            className={`flex-1 py-6 rounded-xl shadow-md transition-colors duration-200 ${
+            className={`action-button ${
               hasStory 
                 ? 'bg-purple-600 hover:bg-purple-700 text-white' 
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
@@ -156,7 +156,7 @@ export const StoryForm = ({
           </Button>
 
           <Button 
-            className={`flex-1 py-6 rounded-xl shadow-md transition-colors duration-200 ${
+            className={`action-button ${
               hasStory 
                 ? 'bg-green-600 hover:bg-green-700 text-white' 
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'

@@ -123,7 +123,7 @@ const Index = () => {
   return (
     <div className="min-h-screen">
       <div className="container mx-auto py-12 px-4 sm:px-6">
-        <div className="max-w-4xl mx-auto text-center mb-16 animate-float">
+        <div className="max-w-4xl mx-auto text-center mb-16">
           <h1 className="text-5xl md:text-6xl font-bold mb-4 hero-gradient tracking-tight">
             HummingFlow Studio
           </h1>
@@ -133,7 +133,7 @@ const Index = () => {
         </div>
         
         <div className="split-panel">
-          <Card className="glass-card feather-card rounded-2xl p-8 animate-slideIn">
+          <Card className="glass-card feather-card rounded-2xl p-8">
             <div className="space-y-8">
               <div>
                 <div className="flex justify-between items-center mb-8">
@@ -171,7 +171,7 @@ const Index = () => {
             </div>
           </Card>
 
-          <Card className="glass-card feather-card rounded-2xl p-8 animate-slideIn">
+          <Card className="glass-card feather-card rounded-2xl p-8">
             <StoryEditor
               storyData={storyData}
               interactionPoint={interactionPoint}

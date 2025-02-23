@@ -38,7 +38,7 @@
 }
 
 .hero-gradient {
-  @apply bg-gradient-to-br from-blue-600 via-blue-500 to-purple-500 bg-clip-text text-transparent;
+  @apply bg-gradient-to-br from-blue-600 via-blue-500 to-purple-500 bg-clip-text text-transparent pb-1;
 }
 
 .hero-subtitle {
@@ -95,18 +95,10 @@
          active:from-blue-700 active:to-blue-600;
 }
 
-.animate-float {
-  animation: float 6s ease-in-out infinite;
+.button-container {
+  @apply grid grid-cols-3 gap-4;
 }
 
-@keyframes float {
-  0% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-10px);
-  }
-  100% {
-    transform: translateY(0px);
-  }
+.action-button {
+  @apply flex items-center justify-center py-6 rounded-xl shadow-md transition-colors duration-200;
 }
