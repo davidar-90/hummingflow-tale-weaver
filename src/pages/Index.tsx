@@ -1,7 +1,8 @@
+
 import { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, Feather } from "lucide-react";
 import { toast } from "sonner";
 import { StoryForm } from "@/components/story/StoryForm";
 import { InteractionPoint } from "@/components/story/InteractionPoint";
@@ -82,12 +83,14 @@ const Index = () => {
     }
     
     try {
-      // Combine story content with continuation if it exists
-      const fullStoryText = interactionPoint?.selectedChoice !== undefined && interactionPoint?.continuation 
-        ? `${storyData.storyContent}\n\n${interactionPoint.continuation}`
-        : storyData.storyContent;
+      // Combine title and story content, with continuation if it exists
+      const fullText = `${storyData.storyTitle}.\n\n${storyData.storyContent}${
+        interactionPoint?.selectedChoice !== undefined && interactionPoint?.continuation 
+          ? `\n\n${interactionPoint.continuation}`
+          : ''
+      }`;
 
-      await generateVoice(fullStoryText);
+      await generateVoice(fullText);
       toast.success("Voice generated successfully!");
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Failed to generate voice. Please try again.");
@@ -122,15 +125,16 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
       <div className="container mx-auto py-12">
-        <h1 className="text-4xl md:text-5xl font-bold text-center mb-2 hero-gradient animate-fadeIn">
+        <h1 className="text-4xl md:text-5xl font-bold text-center mb-2 flex items-center justify-center gap-3 text-blue-900">
+          <Feather className="w-10 h-10 text-blue-600" />
           HummingFlow Studio
         </h1>
         <p className="text-center text-blue-600/80 mb-12 animate-fadeIn">
           Create engaging social stories that make a difference
         </p>
         
-        <div className="split-panel">
-          <Card className="glass-card p-8 animate-slideIn">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 px-4 lg:px-6">
+          <Card className="bg-white/90 backdrop-blur-sm border border-blue-100/50 shadow-lg rounded-2xl p-8">
             <div className="space-y-8">
               <div>
                 <div className="flex justify-between items-center mb-8">
@@ -139,7 +143,7 @@ const Index = () => {
                     variant="outline"
                     size="sm"
                     onClick={clearStory}
-                    className="text-gray-600 hover:text-blue-600"
+                    className="text-gray-600 hover:text-blue-600 transition-colors duration-200"
                   >
                     <RefreshCw className="h-4 w-4 mr-2" />
                     Clear Story
@@ -166,7 +170,7 @@ const Index = () => {
             </div>
           </Card>
 
-          <Card className="glass-card p-8 animate-slideIn">
+          <Card className="bg-white/90 backdrop-blur-sm border border-blue-100/50 shadow-lg rounded-2xl p-8">
             <StoryEditor
               storyData={storyData}
               interactionPoint={interactionPoint}
