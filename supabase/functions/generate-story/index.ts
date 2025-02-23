@@ -1,123 +1,144 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { CreateChatCompletionRequestMessage, ChatRole } from "./types.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent';
-const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
-
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { 
+      status: 200,
+      headers: corsHeaders 
+    });
   }
 
   try {
-    const {
-      therapyGoal,
-      ageGroup,
-      communicationLevel,
-      supportCues,
-      studentInterests,
-      systemInstructions
-    } = await req.json();
+    const requestData = await req.json();
+    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
 
-    console.log('[Debug] API Key available:', !!GEMINI_API_KEY);
-    console.log('[Debug] Generating story with inputs:', {
-      therapyGoal,
-      ageGroup,
-      communicationLevel,
-      supportCues,
-      studentInterests
-    });
+    console.log('API Key available:', !!GEMINI_API_KEY);
 
-    const prompt = `
-Create a social story with the following requirements:
-- Therapy Goal: ${therapyGoal}
-- Age Group: ${ageGroup}
-- Communication Level: ${communicationLevel}
-- Support Cues needed: ${supportCues}
-- Student Interests: ${studentInterests}
+    if (!GEMINI_API_KEY) {
+      console.error('Missing Gemini API key');
+      return new Response(
+        JSON.stringify({ error: 'API key not configured' }),
+        { 
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
 
-${systemInstructions}
+    const messages: CreateChatCompletionRequestMessage[] = [
+      {
+        role: 'user' as ChatRole,
+        content: `Create a social story focusing on ${requestData.therapyGoal} for a ${requestData.ageGroup} student with ${requestData.communicationLevel} communication level. Their interests include: ${requestData.studentInterests}. ${requestData.systemInstructions}`
+      }
+    ];
 
-The story should include an interaction point where the student can practice making choices.
-IMPORTANT: The interaction point MUST have EXACTLY 3 choices, where:
-- Only one choice is correct
-- Two choices are incorrect but plausible
-- All choices are positive and constructive
-- No choices should depict negative behaviors
-
-Format the response as a JSON object with the following structure:
-{
-  "title": "Story Title",
-  "content": "Story content before the interaction point",
-  "imagePrompt": "A clear description for generating an illustration",
-  "interactionPoint": {
-    "prompt": "What should [character] do?",
-    "choices": [
-      {"text": "First option (correct)", "isCorrect": true},
-      {"text": "Second option", "isCorrect": false},
-      {"text": "Third option", "isCorrect": false}
-    ],
-    "feedback": {
-      "correct": "Positive feedback for correct choice",
-      "incorrect": "Supportive guidance for incorrect choice"
-    },
-    "continuation": "Story continuation after choice is made",
-    "continuationImagePrompt": "A clear description for generating an illustration for the continuation"
-  }
-}`;
-
-    console.log('[Debug] Sending request to Gemini');
-
-    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+    console.log('Making request to Gemini API...');
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
+    
+    const response = await fetch(apiUrl, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         contents: [{
           parts: [{
-            text: prompt
+            text: messages[0].content
           }]
         }],
         generationConfig: {
           temperature: 0.7,
-          topK: 32,
-          topP: 1,
-          maxOutputTokens: 2048,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 1024,
         },
+        safetySettings: [
+          {
+            category: "HARM_CATEGORY_HARASSMENT",
+            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+          },
+          {
+            category: "HARM_CATEGORY_HATE_SPEECH",
+            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+          },
+          {
+            category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+          },
+          {
+            category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+            threshold: "BLOCK_MEDIUM_AND_ABOVE"
+          }
+        ]
       })
     });
 
+    const data = await response.json();
+    console.log('Raw API response:', JSON.stringify(data, null, 2));
+
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('[Debug] Gemini API error:', errorText);
-      throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
+      console.error('API request failed:', data);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Failed to generate story',
+          details: data
+        }),
+        { 
+          status: response.status,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
 
-    const data = await response.json();
-    console.log('[Debug] Gemini response:', JSON.stringify(data, null, 2));
+    const storyContent = data.candidates[0].content.parts[0].text;
+    console.log('Generated story content:', storyContent);
 
-    const generatedContent = data.candidates[0].content.parts[0].text;
-    console.log('[Debug] Generated content:', generatedContent);
+    // Try to parse the story content as JSON
+    let parsedStory;
+    try {
+      const cleanContent = storyContent.replace(/```json\s*|\s*```/g, '').trim();
+      parsedStory = JSON.parse(cleanContent);
+    } catch (error) {
+      console.error('Failed to parse story JSON:', error);
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid story format received from API',
+          details: error.message,
+          content: storyContent
+        }),
+        { 
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
 
-    return new Response(generatedContent, {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify(parsedStory),
+      { 
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
+    );
+
   } catch (error) {
-    console.error('[Debug] Error in generate-story:', error);
+    console.error('Unexpected error:', error);
     return new Response(
       JSON.stringify({ 
-        error: error.message,
-        stack: error.stack 
+        error: 'Internal server error',
+        details: error.message
       }),
-      {
+      { 
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
     );
   }
