@@ -6,21 +6,22 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Sparkles, CheckCircle2, XCircle } from "lucide-react";
+import { Sparkles, CheckCircle2, XCircle, RefreshCw } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const Index = () => {
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [storyData, setStoryData] = useState({
+  const initialStoryData = {
     therapyGoal: '',
     communicationLevel: '',
     supportCues: '',
     studentInterests: '',
     storyTitle: '',
     storyContent: ''
-  });
+  };
 
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [storyData, setStoryData] = useState(initialStoryData);
   const [interactionPoint, setInteractionPoint] = useState<{
     prompt: string;
     choices: { text: string; isCorrect: boolean }[];
@@ -34,6 +35,12 @@ const Index = () => {
       ...prev,
       [field]: value
     }));
+  };
+
+  const clearStory = () => {
+    setStoryData(initialStoryData);
+    setInteractionPoint(null);
+    toast.success("Story cleared successfully!");
   };
 
   const handleChoiceSelection = (index: number) => {
@@ -166,7 +173,19 @@ const Index = () => {
           <Card className="glass-card p-8 animate-slideIn">
             <div className="space-y-8">
               <div>
-                <h2 className="text-2xl font-semibold text-blue-900 mb-8">Story Setup</h2>
+                <div className="flex justify-between items-center mb-8">
+                  <h2 className="text-2xl font-semibold text-blue-900">Story Setup</h2>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={clearStory}
+                    className="text-gray-600 hover:text-blue-600"
+                  >
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                    Clear Story
+                  </Button>
+                </div>
+                
                 <div className="space-y-6">
                   <div className="form-group">
                     <Label htmlFor="therapyGoal" className="text-blue-900">Therapy Goal *</Label>
