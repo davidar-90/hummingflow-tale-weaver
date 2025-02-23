@@ -16,18 +16,20 @@ serve(async (req) => {
 
   try {
     const { prompt } = await req.json();
-    console.log('Received image generation request with prompt:', prompt);
+    console.log('[Debug] API Key available:', !!GEMINI_API_KEY);
+    console.log('[Debug] Received prompt:', prompt);
 
+    // Ensure the request matches exactly what the Python client would send
     const request = {
-      model: 'imagen-3.0-generate-002',
-      prompt: `High quality digital illustration in a friendly children's book style: ${prompt}`,
-      config: {
-        numberOfImages: 1,
-        aspectRatio: "16:9"
-      }
+      contents: [{
+        parts: [{
+          text: `High quality digital illustration in a friendly children's book style: ${prompt}`
+        }]
+      }]
     };
 
-    console.log('Sending request to Imagen API:', JSON.stringify(request, null, 2));
+    console.log('[Debug] Request payload:', JSON.stringify(request, null, 2));
+    console.log('[Debug] Full API URL:', `${IMAGEN_API_URL}?key=${GEMINI_API_KEY?.substring(0, 5)}...`);
 
     const response = await fetch(`${IMAGEN_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
@@ -37,22 +39,28 @@ serve(async (req) => {
       body: JSON.stringify(request)
     });
 
+    console.log('[Debug] Response status:', response.status);
+    console.log('[Debug] Response status text:', response.statusText);
+
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Imagen API error:', errorText);
-      throw new Error(`Failed to generate image: ${response.statusText}`);
+      console.error('[Debug] Full error response:', errorText);
+      throw new Error(`Failed to generate image: ${response.statusText} - ${errorText}`);
     }
 
     const data = await response.json();
-    console.log('Received response from Imagen:', JSON.stringify(data, null, 2));
+    console.log('[Debug] Success response:', JSON.stringify(data, null, 2));
 
     return new Response(JSON.stringify(data), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('Error in generate-image function:', error);
+    console.error('[Debug] Detailed error:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: error.message,
+        stack: error.stack
+      }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
