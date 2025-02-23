@@ -6,7 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const VERTEX_AI_URL = 'https://us-central1-aiplatform.googleapis.com/v1/projects/PROJECT_ID/locations/us-central1/publishers/google/models/imagegeneration:generateImage';
+const VERTEX_AI_URL = 'https://us-central1-aiplatform.googleapis.com/v1/projects/imagen/locations/us-central1/publishers/google/models/imagegeneration:generateImage';
 const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
 
 serve(async (req) => {
