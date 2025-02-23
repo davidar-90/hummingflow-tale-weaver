@@ -20,19 +20,11 @@ export const StoryEditor = ({
   audioContent,
   isGeneratingVoice 
 }: StoryEditorProps) => {
-  // Calculate dynamic height based on content
-  const getTextareaHeight = (text: string) => {
-    const lines = text.split('\n').length;
-    const lineHeight = 24; // approximate line height in pixels
-    const padding = 32; // total vertical padding
-    return Math.max((lines * lineHeight) + padding, 80); // minimum height of 80px
-  };
-
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-semibold text-blue-900 mb-4">Story Content</h2>
+      <h2 className="text-2xl font-semibold text-blue-900 mb-6">Story Content</h2>
       
-      <div className="flex justify-between items-center mb-2">
+      <div className="flex justify-between items-center mb-4">
         <Label htmlFor="storyTitle" className="text-blue-900">Title</Label>
         <StoryAudioPlayer 
           audioContent={audioContent}
@@ -40,7 +32,7 @@ export const StoryEditor = ({
         />
       </div>
 
-      <div className="form-group mb-6">
+      <div className="form-group">
         <Input
           id="storyTitle"
           type="text"
@@ -51,21 +43,20 @@ export const StoryEditor = ({
         />
       </div>
       
-      <div className="space-y-6">
+      <div className="space-y-4">
         <div className="form-group">
-          <Label htmlFor="storyContent" className="text-blue-900 mb-3 block">Story Content</Label>
+          <Label htmlFor="storyContent" className="text-blue-900">Story Content</Label>
           <Textarea
             id="storyContent"
             placeholder="Story content will appear here..."
             value={storyData.storyContent}
             onChange={(e) => onInputChange('storyContent', e.target.value)}
-            style={{ height: `${getTextareaHeight(storyData.storyContent)}px` }}
-            className={`text-input resize-none bg-white/50 ${storyData.storyContent ? 'text-black' : 'text-gray-500'} whitespace-pre-wrap transition-all duration-200`}
+            className={`min-h-[200px] text-input resize-none bg-white/50 ${storyData.storyContent ? 'text-black' : 'text-gray-500'} whitespace-pre-wrap`}
           />
         </div>
 
         <div className="form-group">
-          <Label className="text-blue-900 mb-3 block">Story Image</Label>
+          <Label className="text-blue-900">Story Image</Label>
           <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50 flex flex-col items-center justify-center aspect-video w-full">
             {storyData.storyImage ? (
               <img
@@ -83,20 +74,19 @@ export const StoryEditor = ({
       </div>
 
       {interactionPoint?.selectedChoice !== undefined && (
-        <div className="space-y-6">
+        <div className="space-y-4">
           <div className="form-group">
-            <Label htmlFor="continuation" className="text-blue-900 mb-3 block">Story Continuation</Label>
+            <Label htmlFor="continuation" className="text-blue-900">Story Continuation</Label>
             <Textarea
               id="continuation"
               value={interactionPoint.continuation}
               readOnly
-              style={{ height: `${getTextareaHeight(interactionPoint.continuation)}px` }}
-              className="text-input resize-none bg-white/50 text-black whitespace-pre-wrap transition-all duration-200"
+              className="min-h-[200px] text-input resize-none bg-white/50 text-black whitespace-pre-wrap"
             />
           </div>
 
           <div className="form-group">
-            <Label className="text-blue-900 mb-3 block">Continuation Image</Label>
+            <Label className="text-blue-900">Continuation Image</Label>
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50 flex flex-col items-center justify-center aspect-video w-full">
               {storyData.continuationImage ? (
                 <img

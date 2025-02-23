@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -34,9 +33,9 @@ export const StoryForm = ({
   const hasStory = Boolean(storyData.storyContent);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div className="form-group">
-        <Label htmlFor="therapyGoal" className="text-blue-900 mb-3 block">Therapy Goal *</Label>
+        <Label htmlFor="therapyGoal" className="text-blue-900">Therapy Goal *</Label>
         <Select
           value={storyData.therapyGoal}
           onValueChange={(value) => onInputChange('therapyGoal', value)}
@@ -58,7 +57,7 @@ export const StoryForm = ({
       </div>
 
       <div className="form-group">
-        <Label htmlFor="ageGroup" className="text-blue-900 mb-3 block">Age Group / Grade Level *</Label>
+        <Label htmlFor="ageGroup" className="text-blue-900">Age Group / Grade Level *</Label>
         <Select
           value={storyData.ageGroup}
           onValueChange={(value) => onInputChange('ageGroup', value)}
@@ -79,7 +78,7 @@ export const StoryForm = ({
       </div>
 
       <div className="form-group">
-        <Label htmlFor="communicationLevel" className="text-blue-900 mb-3 block">Communication Level *</Label>
+        <Label htmlFor="communicationLevel" className="text-blue-900">Communication Level *</Label>
         <Select
           value={storyData.communicationLevel}
           onValueChange={(value) => onInputChange('communicationLevel', value)}
@@ -100,7 +99,28 @@ export const StoryForm = ({
       </div>
 
       <div className="form-group">
-        <Label htmlFor="studentInterests" className="text-blue-900 mb-3 block">Student Interests *</Label>
+        <Label htmlFor="supportCues" className="text-blue-900">Support Cues (Optional)</Label>
+        <Select
+          value={storyData.supportCues}
+          onValueChange={(value) => onInputChange('supportCues', value)}
+        >
+          <SelectTrigger className="select-input">
+            <SelectValue placeholder="None (Optional)" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="none">None</SelectItem>
+            <SelectItem value="visual">Visual Cues</SelectItem>
+            <SelectItem value="verbal">Verbal Prompts</SelectItem>
+            <SelectItem value="breathing">Deep Breaths</SelectItem>
+            <SelectItem value="first-then">First-Then Structure</SelectItem>
+            <SelectItem value="social-rules">Social Rule Focus</SelectItem>
+            <SelectItem value="emotion-words">Emotion Words</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="form-group">
+        <Label htmlFor="studentInterests" className="text-blue-900">Student Interests *</Label>
         <Input
           id="studentInterests"
           type="text"
@@ -111,7 +131,7 @@ export const StoryForm = ({
         />
       </div>
 
-      <div className="form-group pt-4">
+      <div className="form-group">
         <div className="flex flex-wrap gap-4">
           <Button 
             className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-6 rounded-xl shadow-md transition-colors duration-200"

@@ -1,75 +1,69 @@
+# Welcome to your Lovable project
 
-# HummingFlow Studio
+## Project info
 
-HummingFlow Studio is an AI-powered tool designed to help educators and speech-language pathologists create engaging social stories for their students. The application generates personalized stories based on specific therapy goals, age groups, and student interests.
+**URL**: https://lovable.dev/projects/0c6adf2a-90e8-4f7d-8c39-ce97985fe72b
 
-## Features
+## How can I edit this code?
 
-### Story Generation
-- **Personalized Content**: Create stories tailored to specific therapy goals and student interests
-- **Age-Appropriate**: Content automatically adjusted for different age groups and communication levels
-- **Interactive Elements**: Stories include interaction points to engage students
-- **Multi-Modal Learning**: Combines text, images, and audio for comprehensive learning
+There are several ways of editing your application.
 
-### Content Creation Tools
-- **AI Story Generation**: Automatically generates relevant and engaging stories
-- **Image Generation**: Creates custom illustrations for each story
-- **Voice Generation**: Converts stories into audio for accessibility
-- **Interactive Elements**: Includes choice points and feedback mechanisms
+**Use Lovable**
 
-## Getting Started
+Simply visit the [Lovable Project](https://lovable.dev/projects/0c6adf2a-90e8-4f7d-8c39-ce97985fe72b) and start prompting.
 
-### Prerequisites
-- Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+Changes made via Lovable will be committed automatically to this repo.
 
-### Local Development
+**Use your preferred IDE**
+
+If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+
+The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+
+Follow these steps:
+
 ```sh
-# Clone the repository
+# Step 1: Clone the repository using the project's Git URL.
 git clone <YOUR_GIT_URL>
 
-# Navigate to project directory
+# Step 2: Navigate to the project directory.
 cd <YOUR_PROJECT_NAME>
 
-# Install dependencies
-npm install
+# Step 3: Install the necessary dependencies.
+npm i
 
-# Start development server
+# Step 4: Start the development server with auto-reloading and an instant preview.
 npm run dev
 ```
 
-### Project Structure
-- `src/components/story/` - Story-related components
-- `src/hooks/` - Custom hooks for story, image, and voice generation
-- `src/types/` - TypeScript type definitions
-- `src/pages/` - Main application pages
+**Edit a file directly in GitHub**
 
-## Technology Stack
-- **Frontend**: React with TypeScript
-- **Build Tool**: Vite
-- **UI Framework**: Tailwind CSS with shadcn/ui
-- **State Management**: React Hooks
+- Navigate to the desired file(s).
+- Click the "Edit" button (pencil icon) at the top right of the file view.
+- Make your changes and commit the changes.
 
-## Contributing
-To contribute to this project:
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
+**Use GitHub Codespaces**
 
-## Deployment
-You can deploy this project in several ways:
+- Navigate to the main page of your repository.
+- Click on the "Code" button (green button) near the top right.
+- Select the "Codespaces" tab.
+- Click on "New codespace" to launch a new Codespace environment.
+- Edit files directly within the Codespace and commit and push your changes once you're done.
 
-1. **Using Lovable**
-   - Open [Lovable](https://lovable.dev/projects/0c6adf2a-90e8-4f7d-8c39-ce97985fe72b)
-   - Click on Share -> Publish
+## What technologies are used for this project?
 
-2. **Custom Domain**
-   - While we don't support custom domains directly yet, you can deploy to Netlify
-   - Visit our [Custom domains documentation](https://docs.lovable.dev/tips-tricks/custom-domain/) for more details
+This project is built with .
 
-## Support
-- Documentation: [Lovable Docs](https://docs.lovable.dev/)
-- Project URL: [HummingFlow Studio on Lovable](https://lovable.dev/projects/0c6adf2a-90e8-4f7d-8c39-ce97985fe72b)
+- Vite
+- TypeScript
+- React
+- shadcn-ui
+- Tailwind CSS
 
-## License
-This project is licensed under the MIT License - see the LICENSE file for details.
+## How can I deploy this project?
+
+Simply open [Lovable](https://lovable.dev/projects/0c6adf2a-90e8-4f7d-8c39-ce97985fe72b) and click on Share -> Publish.
+
+## I want to use a custom domain - is that possible?
+
+We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
