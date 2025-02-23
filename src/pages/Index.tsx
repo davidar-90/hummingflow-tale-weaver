@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -40,14 +41,20 @@ const Index = () => {
     toast.success("Story cleared successfully!");
   };
 
-  const generateImage = async (generateBoth: boolean = true) => {
+  const generateImage = async () => {
     if (!storyData.storyContent) {
       toast.error("Please generate a story first");
+      return;
+    }
+
+    if (!interactionPoint?.selectedChoice !== undefined) {
+      toast.error("Please select an interaction choice first");
       return;
     }
     
     setIsGeneratingImage(true);
     try {
+      // Generate initial story image
       const storyPrompt = storyData.imagePrompt || storyData.storyContent;
       console.log('Using story image prompt:', storyPrompt);
       
@@ -65,7 +72,8 @@ const Index = () => {
         storyImage: storyImageData.imageUrl
       }));
 
-      if (generateBoth && interactionPoint?.continuation && storyData.continuationImagePrompt) {
+      // Generate continuation image
+      if (storyData.continuationImagePrompt) {
         const continuationPrompt = storyData.continuationImagePrompt;
         console.log('Using continuation image prompt:', continuationPrompt);
         
