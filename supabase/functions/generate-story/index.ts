@@ -2,8 +2,8 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent';
 const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
-const GENAI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,7 +13,7 @@ const corsHeaders = {
 async function generateStoryContent(params: any) {
   console.log('Generating story with params:', params);
   
-  const response = await fetch(`${GENAI_API_URL}?key=${GEMINI_API_KEY}`, {
+  const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -23,15 +23,17 @@ async function generateStoryContent(params: any) {
         parts: [{
           text: `Create an engaging social story with a title, content, and an interaction point.
 
-          Response format should be JSON with:
+          Your response must be in this exact JSON format:
           {
             "title": "story title",
             "content": "main story content",
+            "imagePrompt": "detailed image prompt",
             "interactionPoint": {
               "prompt": "interaction question",
               "choices": [{"text": "choice text", "isCorrect": boolean}],
               "feedback": {"correct": "feedback", "incorrect": "feedback"},
-              "continuation": "story continuation"
+              "continuation": "story continuation",
+              "continuationImagePrompt": "continuation image prompt"
             }
           }
 
@@ -43,9 +45,17 @@ async function generateStoryContent(params: any) {
           - Student interests: ${params.studentInterests}
           
           Additional instructions:
-          ${params.systemInstructions}`
+          ${params.systemInstructions}
+          
+          Remember to return ONLY the JSON object, no additional text or markdown.`
         }]
-      }]
+      }],
+      generationConfig: {
+        temperature: 0.7,
+        topK: 32,
+        topP: 1,
+        maxOutputTokens: 2048
+      }
     })
   });
 
@@ -65,75 +75,25 @@ async function generateStoryContent(params: any) {
   const jsonContent = geminiResponse.candidates[0].content.parts[0].text;
   console.log('Raw JSON content:', jsonContent);
   
-  const cleanJson = jsonContent.replace(/```json\n|\n```/g, '').trim();
-  console.log('Cleaned JSON:', cleanJson);
-  
   try {
+    // Clean up any markdown formatting that might be present
+    const cleanJson = jsonContent.replace(/```json\n|\n```/g, '').trim();
+    console.log('Cleaned JSON:', cleanJson);
+    
     const parsedData = JSON.parse(cleanJson);
     console.log('Successfully parsed story data:', parsedData);
+    
+    // Validate required fields
+    if (!parsedData.title || !parsedData.content || !parsedData.interactionPoint) {
+      throw new Error('Missing required fields in generated story');
+    }
+    
     return parsedData;
   } catch (error) {
     console.error('JSON parsing error:', error);
-    console.error('Failed to parse JSON:', cleanJson);
-    throw new Error('Failed to parse story data from Gemini response');
+    console.error('Failed to parse JSON:', jsonContent);
+    throw new Error(`Failed to parse story data: ${error.message}`);
   }
-}
-
-async function generateImagePrompt(title: string, content: string, isInitial: boolean = true) {
-  console.log(`Generating ${isInitial ? 'initial' : 'continuation'} image prompt for:`, { title, content });
-  
-  const response = await fetch(`${GENAI_API_URL}?key=${GEMINI_API_KEY}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      contents: [{
-        parts: [{
-          text: `You are an expert at creating image generation prompts. I need a detailed image prompt for this ${isInitial ? 'story' : 'continuation'}:
-
-Title: ${title}
-${isInitial ? 'Story' : 'Continuation'}: ${content}
-
-Create a highly detailed prompt for an illustration that captures the key moment of this story. The prompt should:
-1. Describe the main characters and their emotions
-2. Detail the setting and environment
-3. Specify the art style as "friendly children's illustration style"
-4. Include lighting and atmosphere details
-5. Focus on positive, engaging imagery
-
-Write your response as a single, detailed image prompt with no additional text, explanations, or markdown.`
-        }]
-      }],
-      generationConfig: {
-        temperature: 0.7,
-        maxOutputTokens: 200
-      }
-    })
-  });
-
-  if (!response.ok) {
-    console.error('Image prompt generation error:', await response.text());
-    throw new Error(`Failed to generate image prompt: ${response.statusText}`);
-  }
-
-  const geminiResponse = await response.json();
-  console.log('Raw image prompt response:', JSON.stringify(geminiResponse, null, 2));
-  
-  if (!geminiResponse.candidates?.[0]?.content?.parts?.[0]?.text) {
-    console.error('Invalid image prompt response format:', geminiResponse);
-    throw new Error('Invalid response format from Gemini API for image prompt');
-  }
-
-  const imagePrompt = geminiResponse.candidates[0].content.parts[0].text
-    .trim()
-    .replace(/^["']|["']$/g, '') // Remove any quotes
-    .replace(/```|\n/g, ' ') // Remove any markdown and newlines
-    .trim();
-  
-  console.log('Generated image prompt:', imagePrompt);
-  
-  return imagePrompt;
 }
 
 serve(async (req) => {
@@ -145,53 +105,18 @@ serve(async (req) => {
     console.log('Received request:', await req.clone().text());
     const params = await req.json();
     
-    // Step 1: Generate the story content
     console.log('Step 1: Generating story content...');
     const storyData = await generateStoryContent(params);
-    console.log('Story data generated successfully');
+    console.log('Story data generated successfully:', storyData);
 
-    // Step 2: Generate the image prompt for the initial story
-    console.log('Step 2: Generating initial image prompt...');
-    const imagePrompt = await generateImagePrompt(storyData.title, storyData.content);
-    console.log('Initial image prompt generated successfully');
-
-    // Step 3: If there's a continuation, generate its image prompt
-    let continuationImagePrompt = '';
-    if (storyData.interactionPoint?.continuation) {
-      console.log('Step 3: Generating continuation image prompt...');
-      continuationImagePrompt = await generateImagePrompt(
-        storyData.title,
-        storyData.interactionPoint.continuation,
-        false
-      );
-      console.log('Continuation image prompt generated successfully');
-    }
-
-    // Combine all data
-    const finalData = {
-      ...storyData,
-      imagePrompt,
-      interactionPoint: storyData.interactionPoint ? {
-        ...storyData.interactionPoint,
-        continuationImagePrompt
-      } : null
-    };
-
-    // Validate the final data
-    if (!finalData.title || !finalData.content || !finalData.imagePrompt || !finalData.interactionPoint) {
-      console.error('Missing required fields in final data:', finalData);
-      throw new Error('Generated story is missing required fields');
-    }
-
-    console.log('Sending successful response with data:', finalData);
-    return new Response(JSON.stringify(finalData), {
+    return new Response(JSON.stringify(storyData), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
     console.error('Error in generate-story function:', error);
     return new Response(JSON.stringify({ 
       error: error.message,
-      details: 'Failed to generate story content'
+      details: error.stack || 'Failed to generate story content'
     }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
