@@ -22,9 +22,9 @@ export const StoryEditor = ({
 }: StoryEditorProps) => {
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-semibold text-blue-900 mb-6">Story Content</h2>
+      <h2 className="text-2xl font-semibold text-blue-900 mb-4">Story Content</h2>
       
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center mb-2">
         <Label htmlFor="storyTitle" className="text-blue-900">Title</Label>
         <StoryAudioPlayer 
           audioContent={audioContent}
@@ -32,7 +32,7 @@ export const StoryEditor = ({
         />
       </div>
 
-      <div className="form-group">
+      <div className="form-group mb-4">
         <Input
           id="storyTitle"
           type="text"
