@@ -143,6 +143,12 @@ const Index = () => {
                   className="min-h-[400px] text-input resize-none bg-white/50"
                 />
               </div>
+
+              <div className="form-group">
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 bg-gray-50 flex items-center justify-center min-h-[200px]">
+                  <p className="text-gray-400">Image will appear here</p>
+                </div>
+              </div>
             </div>
           </Card>
         </div>
