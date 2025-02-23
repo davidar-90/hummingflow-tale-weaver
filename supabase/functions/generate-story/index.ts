@@ -9,38 +9,45 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
+// System instructions that will be consistent for all requests
+const systemInstructions = `You are an expert in creating social stories for children with different communication needs. 
+Your stories should:
+- Have a clear beginning, middle, and end structure
+- Be positive and encouraging throughout
+- Use simple, clear language appropriate for the child's communication level
+- Include repetition of key concepts when appropriate
+- Be concise but impactful
+- Focus on one main concept or skill at a time
+- Use present tense and first person when possible
+- Avoid abstract concepts unless specifically appropriate for the communication level
+- Include concrete examples and clear action steps
+- Maintain an engaging narrative that connects with the child's interests`
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   try {
-    const { therapyGoal, communicationLevel, supportCues, studentInterests } = await req.json()
+    const { therapyGoal, communicationLevel, studentInterests } = await req.json()
 
-    // Construct a detailed prompt for the Gemini model
-    const prompt = `As an expert in creating social stories for children, create an engaging and educational story based on these parameters:
+    // User-specific prompt that builds on the system instructions
+    const prompt = `Based on these specific parameters:
 
 Therapy Goal: ${therapyGoal}
 Communication Level: ${communicationLevel}
-Support Cues: ${supportCues}
 Student Interests: ${studentInterests}
 
-Create a story that:
-1. Addresses the therapy goal in an engaging way
-2. Uses language appropriate for the specified communication level
-3. Incorporates the student's interests to maintain engagement
-4. Includes the specified support cues naturally in the narrative
-5. Has a clear beginning, middle, and end
-6. Is positive and encouraging
+Create an engaging social story that follows our guidelines, incorporating the student's interests and maintaining appropriate language for their communication level.
 
-Please format the response as a JSON object with two fields:
-- title: A brief, engaging title for the story
-- content: The full story text
+Format the response as a JSON object with:
+{
+  "title": "An engaging, clear title",
+  "content": "The full story text"
+}`
 
-Keep the story concise but impactful, using simple language that matches the communication level.`
-
-    // Call Gemini API
-    const response = await fetch('https://generativelanguage.googleapis.com/v1/models/gemini-1.0-pro:generateContent', {
+    // Call Gemini API with the updated model and prompts
+    const response = await fetch('https://generativelanguage.googleapis.com/v1/models/gemini-1.0-pro-vision-latest:generateContent', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -49,7 +56,7 @@ Keep the story concise but impactful, using simple language that matches the com
       body: JSON.stringify({
         contents: [{
           parts: [{
-            text: prompt
+            text: `${systemInstructions}\n\n${prompt}`
           }]
         }],
         generationConfig: {
