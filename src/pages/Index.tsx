@@ -7,8 +7,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const Index = () => {
+  const [isGenerating, setIsGenerating] = useState(false);
   const [storyData, setStoryData] = useState({
     therapyGoal: '',
     communicationLevel: '',
@@ -23,6 +26,41 @@ const Index = () => {
       ...prev,
       [field]: value
     }));
+  };
+
+  const generateStory = async () => {
+    // Validate required fields
+    if (!storyData.therapyGoal || !storyData.communicationLevel || !storyData.studentInterests) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-story', {
+        body: {
+          therapyGoal: storyData.therapyGoal,
+          communicationLevel: storyData.communicationLevel,
+          supportCues: storyData.supportCues,
+          studentInterests: storyData.studentInterests
+        }
+      });
+
+      if (error) throw error;
+
+      setStoryData(prev => ({
+        ...prev,
+        storyTitle: data.title || 'Untitled Story',
+        storyContent: data.content || 'An error occurred while generating the story.'
+      }));
+
+      toast.success("Story generated successfully!");
+    } catch (error) {
+      console.error('Error generating story:', error);
+      toast.error("Failed to generate story. Please try again.");
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (
@@ -42,7 +80,7 @@ const Index = () => {
             
             <div className="space-y-6">
               <div className="form-group">
-                <Label htmlFor="therapyGoal" className="text-blue-900">Therapy Goal</Label>
+                <Label htmlFor="therapyGoal" className="text-blue-900">Therapy Goal *</Label>
                 <Select
                   value={storyData.therapyGoal}
                   onValueChange={(value) => handleInputChange('therapyGoal', value)}
@@ -64,13 +102,13 @@ const Index = () => {
               </div>
 
               <div className="form-group">
-                <Label htmlFor="communicationLevel" className="text-blue-900">Communication Level</Label>
+                <Label htmlFor="communicationLevel" className="text-blue-900">Communication Level *</Label>
                 <Select
                   value={storyData.communicationLevel}
                   onValueChange={(value) => handleInputChange('communicationLevel', value)}
                 >
                   <SelectTrigger className="select-input">
-                    <SelectValue placeholder="Beginner" />
+                    <SelectValue placeholder="Select level..." />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="pre-verbal">Pre-verbal/Non-verbal</SelectItem>
@@ -106,7 +144,7 @@ const Index = () => {
               </div>
 
               <div className="form-group">
-                <Label htmlFor="studentInterests" className="text-blue-900">Student Interests</Label>
+                <Label htmlFor="studentInterests" className="text-blue-900">Student Interests *</Label>
                 <Input
                   id="studentInterests"
                   type="text"
@@ -119,8 +157,10 @@ const Index = () => {
 
               <Button 
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white py-6 rounded-xl shadow-md transition-colors duration-200"
+                onClick={generateStory}
+                disabled={isGenerating}
               >
-                Generate Story
+                {isGenerating ? 'Generating...' : 'Generate Story'}
                 <Sparkles className="ml-2 h-5 w-5" />
               </Button>
             </div>
