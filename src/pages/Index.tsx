@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Brain } from "lucide-react";
+import { Sparkles } from "lucide-react";
 
 const Index = () => {
   const [storyData, setStoryData] = useState({
@@ -120,8 +120,8 @@ const Index = () => {
               <Button 
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white py-6 rounded-xl shadow-md transition-colors duration-200"
               >
-                <Brain className="mr-2 h-5 w-5" />
                 Generate Story
+                <Sparkles className="ml-2 h-5 w-5" />
               </Button>
             </div>
           </Card>
