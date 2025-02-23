@@ -40,7 +40,7 @@ serve(async (req) => {
         {
           taskType: "imageInference",
           taskUUID: crypto.randomUUID(),
-          positivePrompt: `Modern digital art in Spider-Verse animation style: ${prompt}. Dynamic lighting, bold colors, comic book aesthetic, crisp line work, stylized realism, dramatic angles, subtle cel-shading. Maintain sophisticated design with high attention to detail and modern artistic sensibilities.`,
+          positivePrompt: `Generate an image with a dynamic, stylized animation aesthetic, reminiscent of a modern comic book or graphic novel: ${prompt}. Employ vibrant, saturated colors with layered, textured overlays and halftone patterns. Use strong, exaggerated motion blur and speed lines to convey kinetic energy. Incorporate bold ink lines and fragmented imagery, with a focus on dynamic perspective. The overall feel should be energetic and visually diverse, similar to a pop art inspired animation.`,
           model: "runware:100@1",
           width: WIDTH,
           height: HEIGHT,
