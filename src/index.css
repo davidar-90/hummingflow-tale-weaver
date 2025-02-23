@@ -6,24 +6,24 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
+    --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
+    --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
-    --primary: 213 94% 48%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 213 94% 98%;
-    --accent-foreground: 213 94% 48%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 213 50% 95%;
-    --input: 213 50% 95%;
-    --ring: 213 94% 48%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
     --radius: 1rem;
   }
 }
@@ -33,21 +33,20 @@
     @apply border-border;
   }
   body {
-    @apply bg-gradient-to-br from-blue-50 to-white text-foreground antialiased;
-    background-attachment: fixed;
+    @apply bg-gradient-to-br from-white via-blue-50 to-purple-50 text-foreground antialiased min-h-screen font-sans;
   }
 }
 
 .hero-gradient {
-  @apply text-blue-900;
+  @apply text-4xl md:text-5xl font-bold text-center mb-2 bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent flex items-center justify-center gap-3;
 }
 
 .split-panel {
-  @apply grid grid-cols-1 md:grid-cols-2 gap-6 p-6 min-h-screen max-w-7xl mx-auto;
+  @apply grid grid-cols-1 lg:grid-cols-2 gap-8 p-6 min-h-screen max-w-7xl mx-auto;
 }
 
 .panel {
-  @apply bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-blue-100/50 p-6;
+  @apply bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-blue-100/50 p-8;
 }
 
 .form-group {
@@ -55,21 +54,49 @@
 }
 
 .input-label {
-  @apply block text-sm font-medium text-gray-700;
+  @apply block text-sm font-medium text-gray-700 mb-1;
 }
 
 .text-input {
-  @apply w-full px-4 py-3 rounded-xl border border-blue-100 bg-white/50 backdrop-blur-sm 
+  @apply w-full px-4 py-3 rounded-xl border border-gray-200 bg-white/50 
          focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-300 
          transition-all duration-200 hover:border-blue-200;
 }
 
 .select-input {
-  @apply w-full px-4 py-3 rounded-xl border border-blue-100 bg-white/50 backdrop-blur-sm
+  @apply w-full px-4 py-3 rounded-xl border border-gray-200 bg-white/50
          focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-300
          transition-all duration-200 hover:border-blue-200;
 }
 
 .glass-card {
-  @apply bg-white/90 backdrop-blur-sm border border-blue-100/20 shadow-sm;
+  @apply bg-white/90 backdrop-blur-sm border border-blue-100/50 shadow-lg rounded-2xl;
+}
+
+.story-image-container {
+  @apply relative w-full aspect-video rounded-xl overflow-hidden bg-gray-100 border border-gray-200;
+}
+
+.button-container {
+  @apply grid grid-cols-3 gap-4;
+}
+
+.action-button {
+  @apply flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.generate-story-button {
+  @apply bg-blue-600 hover:bg-blue-700 text-white shadow-lg;
+}
+
+.generate-image-button {
+  @apply bg-purple-600 hover:bg-purple-700 text-white shadow-lg;
+}
+
+.generate-voice-button {
+  @apply bg-green-600 hover:bg-green-700 text-white shadow-lg;
+}
+
+.section-title {
+  @apply text-2xl font-semibold text-gray-800 mb-6;
 }
