@@ -50,6 +50,13 @@ const Index = () => {
     try {
       const prompt = storyData.continuationImagePrompt || storyData.imagePrompt || storyData.storyContent;
       
+      console.log('Using image prompt:', prompt);
+      console.log('Image prompt source:', 
+        storyData.continuationImagePrompt ? 'continuation' : 
+        storyData.imagePrompt ? 'initial' : 
+        'story content'
+      );
+      
       const { data, error } = await supabase.functions.invoke('generate-image', {
         body: { prompt }
       });
