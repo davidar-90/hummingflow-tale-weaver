@@ -10,10 +10,9 @@ const API_ENDPOINT = "https://api.runware.ai/v1";
 
 // Calculate 16:9 height for 1024px width
 const WIDTH = 1024;
-const HEIGHT = Math.floor(WIDTH * (9/16)); // This will be 576px
+const HEIGHT = Math.floor(WIDTH * (9/16));
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { 
       status: 200,
@@ -22,24 +21,11 @@ serve(async (req) => {
   }
 
   try {
-    let requestBody;
-    try {
-      requestBody = await req.json();
-    } catch (error) {
-      console.error('[Debug] Failed to parse request body:', error);
-      return new Response(
-        JSON.stringify({ error: 'Invalid request body' }),
-        { 
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
-
-    const { prompt } = requestBody;
+    const { prompt } = await req.json();
     const RUNWARE_API_KEY = Deno.env.get('RUNWARE_API_KEY');
 
     if (!RUNWARE_API_KEY) {
+      console.error('RUNWARE_API_KEY is not set');
       return new Response(
         JSON.stringify({ error: 'RUNWARE_API_KEY is not set' }),
         { 
@@ -50,6 +36,7 @@ serve(async (req) => {
     }
 
     if (!prompt) {
+      console.error('No prompt provided');
       return new Response(
         JSON.stringify({ error: 'Prompt is required' }),
         { 
@@ -59,9 +46,9 @@ serve(async (req) => {
       );
     }
 
-    console.log('[Debug] Generating image with prompt:', prompt);
+    console.log('Generating image with prompt:', prompt);
 
-    const apiResponse = await fetch(API_ENDPOINT, {
+    const response = await fetch(API_ENDPOINT, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -75,7 +62,7 @@ serve(async (req) => {
         {
           taskType: "imageInference",
           taskUUID: crypto.randomUUID(),
-          positivePrompt: `Generate an image with a dynamic, stylized animation aesthetic, reminiscent of a modern comic book or graphic novel: ${prompt}. Employ vibrant, saturated colors with layered, textured overlays and halftone patterns. Use strong, exaggerated motion blur and speed lines to convey kinetic energy. Incorporate bold ink lines and fragmented imagery, with a focus on dynamic perspective. The overall feel should be energetic and visually diverse, similar to a pop art inspired animation.`,
+          positivePrompt: prompt,
           model: "runware:100@1",
           width: WIDTH,
           height: HEIGHT,
@@ -88,38 +75,28 @@ serve(async (req) => {
       ])
     });
 
-    // First check if the response is ok
-    if (!apiResponse.ok) {
-      console.error('[Debug] API response not ok:', apiResponse.status, apiResponse.statusText);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('API response not ok:', response.status, errorText);
       return new Response(
         JSON.stringify({ 
-          error: 'API request failed',
-          status: apiResponse.status,
-          statusText: apiResponse.statusText
+          error: `API request failed: ${response.statusText}`,
+          details: errorText
         }),
         { 
-          status: apiResponse.status,
+          status: response.status,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         }
       );
     }
 
-    // Get response text first
-    const responseText = await apiResponse.text();
-    console.log('[Debug] Raw API response:', responseText);
+    const data = await response.json();
+    console.log('Raw API response:', JSON.stringify(data, null, 2));
 
-    // Try to parse the response
-    let data;
-    try {
-      data = JSON.parse(responseText);
-    } catch (error) {
-      console.error('[Debug] Failed to parse API response:', error);
+    if (!data.data || !Array.isArray(data.data)) {
+      console.error('Unexpected response structure:', data);
       return new Response(
-        JSON.stringify({ 
-          error: 'Invalid JSON response from API',
-          details: error.message,
-          responseText: responseText
-        }),
+        JSON.stringify({ error: 'Unexpected API response structure' }),
         { 
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -127,31 +104,12 @@ serve(async (req) => {
       );
     }
 
-    // Check if data has the expected structure
-    if (!Array.isArray(data?.data)) {
-      console.error('[Debug] Unexpected response structure:', data);
-      return new Response(
-        JSON.stringify({ 
-          error: 'Unexpected API response structure',
-          response: data
-        }),
-        { 
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
-
-    // Find the image inference result
     const imageData = data.data.find((item: any) => item.taskType === "imageInference");
     
-    if (!imageData) {
-      console.error('[Debug] No image inference data found in response:', data);
+    if (!imageData || !imageData.imageURL) {
+      console.error('No valid image data in response:', data);
       return new Response(
-        JSON.stringify({ 
-          error: 'No image inference data in response',
-          response: data
-        }),
+        JSON.stringify({ error: 'No valid image data in response' }),
         { 
           status: 500,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -159,21 +117,6 @@ serve(async (req) => {
       );
     }
 
-    if (!imageData.imageURL) {
-      console.error('[Debug] No image URL in inference data:', imageData);
-      return new Response(
-        JSON.stringify({ 
-          error: 'No image URL in response',
-          inferenceData: imageData
-        }),
-        { 
-          status: 500,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-        }
-      );
-    }
-
-    // Successfully got the image URL
     return new Response(
       JSON.stringify({ imageUrl: imageData.imageURL }),
       { 
@@ -183,13 +126,9 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('[Debug] Unexpected error:', error);
+    console.error('Unexpected error:', error);
     return new Response(
-      JSON.stringify({ 
-        error: 'Internal server error',
-        message: error.message,
-        stack: error.stack
-      }),
+      JSON.stringify({ error: error.message }),
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }

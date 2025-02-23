@@ -28,22 +28,26 @@ export const useImageGeneration = () => {
       const storyPrompt = `${baseStyle}. ${characterContext}Scene: ${imagePrompt || storyContent}. ${artDirection}`;
       console.log('Using story image prompt:', storyPrompt);
       
-      const { data: storyImageData, error: storyImageError } = await supabase.functions.invoke('generate-image', {
+      const { data: response, error: storyImageError } = await supabase.functions.invoke('generate-image', {
         body: { prompt: storyPrompt }
       });
+
+      console.log('Edge function response:', response);
 
       if (storyImageError) {
         console.error('Story image generation error:', storyImageError);
         throw storyImageError;
       }
 
-      if (storyImageData.error) {
-        console.error('Story image API error:', storyImageData.error);
-        throw new Error(storyImageData.error);
+      if (!response || response.error) {
+        console.error('Story image API error:', response?.error || 'No response received');
+        throw new Error(response?.error || 'Failed to generate image');
       }
 
-      if (!storyImageData.imageUrl) {
-        console.error('No image URL in response:', storyImageData);
+      // Ensure we're accessing the imageUrl property correctly
+      const storyImageUrl = response.imageUrl;
+      if (!storyImageUrl) {
+        console.error('No image URL in response:', response);
         throw new Error('Failed to generate image: No image URL received');
       }
 
@@ -53,35 +57,40 @@ export const useImageGeneration = () => {
         const continuationPrompt = `${baseStyle}. ${characterContext}Scene: ${continuationImagePrompt}. ${artDirection}. Maintain exact same character appearances, clothing, and art style as the previous image for consistency.`;
         console.log('Using continuation image prompt:', continuationPrompt);
         
-        const { data: continuationImageData, error: continuationImageError } = await supabase.functions.invoke('generate-image', {
+        const { data: contResponse, error: continuationImageError } = await supabase.functions.invoke('generate-image', {
           body: { prompt: continuationPrompt }
         });
+
+        console.log('Continuation edge function response:', contResponse);
 
         if (continuationImageError) {
           console.error('Continuation image generation error:', continuationImageError);
           throw continuationImageError;
         }
 
-        if (continuationImageData.error) {
-          console.error('Continuation image API error:', continuationImageData.error);
-          throw new Error(continuationImageData.error);
+        if (!contResponse || contResponse.error) {
+          console.error('Continuation image API error:', contResponse?.error || 'No response received');
+          throw new Error(contResponse?.error || 'Failed to generate continuation image');
         }
 
-        if (!continuationImageData.imageUrl) {
-          console.error('No continuation image URL in response:', continuationImageData);
+        // Ensure we're accessing the imageUrl property correctly for continuation
+        const continuationImageUrl = contResponse.imageUrl;
+        if (!continuationImageUrl) {
+          console.error('No continuation image URL in response:', contResponse);
           throw new Error('Failed to generate continuation image: No image URL received');
         }
 
-        continuationImage = continuationImageData.imageUrl;
+        continuationImage = continuationImageUrl;
       }
 
       return {
-        storyImage: storyImageData.imageUrl,
+        storyImage: storyImageUrl,
         continuationImage
       };
     } catch (error) {
       console.error('Image generation error:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to generate image. Please try again.');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to generate image. Please try again.';
+      toast.error(errorMessage);
       throw error;
     } finally {
       setIsGeneratingImage(false);
