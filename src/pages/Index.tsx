@@ -40,7 +40,7 @@ const Index = () => {
     toast.success("Story cleared successfully!");
   };
 
-  const generateImage = async () => {
+  const generateImage = async (isContinuation: boolean = false) => {
     if (!storyData.storyContent) {
       toast.error("Please generate a story first");
       return;
@@ -48,14 +48,12 @@ const Index = () => {
     
     setIsGeneratingImage(true);
     try {
-      const prompt = storyData.continuationImagePrompt || storyData.imagePrompt || storyData.storyContent;
+      const prompt = isContinuation 
+        ? storyData.continuationImagePrompt || interactionPoint?.continuation || ''
+        : storyData.imagePrompt || storyData.storyContent;
       
       console.log('Using image prompt:', prompt);
-      console.log('Image prompt source:', 
-        storyData.continuationImagePrompt ? 'continuation' : 
-        storyData.imagePrompt ? 'initial' : 
-        'story content'
-      );
+      console.log('Image prompt source:', isContinuation ? 'continuation' : 'initial');
       
       const { data, error } = await supabase.functions.invoke('generate-image', {
         body: { prompt }
@@ -71,10 +69,10 @@ const Index = () => {
       
       setStoryData(prev => ({
         ...prev,
-        [storyData.continuationImagePrompt ? 'continuationImage' : 'storyImage']: data.imageUrl,
+        [isContinuation ? 'continuationImage' : 'storyImage']: data.imageUrl,
       }));
 
-      toast.success('Image generated successfully!');
+      toast.success(`${isContinuation ? 'Continuation image' : 'Story image'} generated successfully!`);
     } catch (error) {
       console.error('Error generating image:', error);
       toast.error('Failed to generate image. Please try again.');
@@ -133,6 +131,8 @@ const Index = () => {
 
       setInteractionPoint(interactionPoint);
 
+      await generateImage(false);
+
       toast.success("Story generated successfully!");
     } catch (error) {
       console.error('Error generating story:', error);
@@ -164,6 +164,8 @@ const Index = () => {
         storyContent: prev.storyContent + '\n\n' + interactionPoint.continuation,
         continuationImagePrompt: interactionPoint.continuationImagePrompt
       }));
+
+      await generateImage(true);
     }
   };
 
