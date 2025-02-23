@@ -23,7 +23,7 @@ export const StoryEditor = ({
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-4">
-        <Label htmlFor="storyTitle" className="text-blue-900">Title</Label>
+        <Label htmlFor="storyTitle" className="text-lg font-medium text-gray-900">Title</Label>
         <StoryAudioPlayer 
           audioContent={audioContent}
           isGenerating={isGeneratingVoice}
@@ -37,30 +37,30 @@ export const StoryEditor = ({
           placeholder="Story title..."
           value={storyData.storyTitle}
           onChange={(e) => onInputChange('storyTitle', e.target.value)}
-          className={`text-input ${storyData.storyTitle ? 'text-black' : 'text-gray-500'}`}
+          className={`text-input ${storyData.storyTitle ? 'text-gray-900' : 'text-gray-500'}`}
         />
       </div>
       
       <div className="space-y-4">
         <div className="form-group">
-          <Label htmlFor="storyContent" className="text-blue-900">Story Content</Label>
+          <Label htmlFor="storyContent" className="text-lg font-medium text-gray-900">Story Content</Label>
           <Textarea
             id="storyContent"
             placeholder="Story content will appear here..."
             value={storyData.storyContent}
             onChange={(e) => onInputChange('storyContent', e.target.value)}
-            className={`min-h-[200px] text-input resize-none bg-white/50 ${storyData.storyContent ? 'text-black' : 'text-gray-500'} whitespace-pre-wrap`}
+            className={`min-h-[200px] text-input resize-none bg-white shadow-sm ${storyData.storyContent ? 'text-gray-900' : 'text-gray-500'} whitespace-pre-wrap`}
           />
         </div>
 
         <div className="form-group">
-          <Label className="text-blue-900">Story Image</Label>
-          <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50 flex flex-col items-center justify-center aspect-video w-full">
+          <Label className="text-lg font-medium text-gray-900">Story Image</Label>
+          <div className="border-2 border-dashed border-gray-200 rounded-lg p-4 bg-white/50 flex flex-col items-center justify-center aspect-video w-full transition-colors hover:border-apple-blue/30">
             {storyData.storyImage ? (
               <img
                 src={storyData.storyImage}
                 alt="Story illustration"
-                className="w-full h-full object-cover rounded"
+                className="w-full h-full object-cover rounded-md"
               />
             ) : (
               <div className="w-full h-full flex items-center justify-center">
@@ -74,23 +74,23 @@ export const StoryEditor = ({
       {interactionPoint?.selectedChoice !== undefined && (
         <div className="space-y-4">
           <div className="form-group">
-            <Label htmlFor="continuation" className="text-blue-900">Story Continuation</Label>
+            <Label htmlFor="continuation" className="text-lg font-medium text-gray-900">Story Continuation</Label>
             <Textarea
               id="continuation"
               value={interactionPoint.continuation}
               readOnly
-              className="min-h-[200px] text-input resize-none bg-white/50 text-black whitespace-pre-wrap"
+              className="min-h-[200px] text-input resize-none bg-white shadow-sm text-gray-900 whitespace-pre-wrap"
             />
           </div>
 
           <div className="form-group">
-            <Label className="text-blue-900">Continuation Image</Label>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50 flex flex-col items-center justify-center aspect-video w-full">
+            <Label className="text-lg font-medium text-gray-900">Continuation Image</Label>
+            <div className="border-2 border-dashed border-gray-200 rounded-lg p-4 bg-white/50 flex flex-col items-center justify-center aspect-video w-full transition-colors hover:border-apple-blue/30">
               {storyData.continuationImage ? (
                 <img
                   src={storyData.continuationImage}
                   alt="Story continuation illustration"
-                  className="w-full h-full object-cover rounded"
+                  className="w-full h-full object-cover rounded-md"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">

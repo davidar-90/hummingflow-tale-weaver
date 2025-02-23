@@ -25,17 +25,9 @@ export default {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
-        sage: {
-          50: "#f6f7f6",
-          100: "#e3e7e3",
-          200: "#c7d1c7",
-          300: "#a3b2a3",
-          400: "#7e907e",
-          500: "#637463",
-          600: "#4d5b4d",
-          700: "#404940",
-          800: "#363b36",
-          900: "#2f332f",
+        apple: {
+          gray: "#F7F7F7",
+          blue: "#007AFF",
         },
         primary: {
           DEFAULT: "hsl(var(--primary))",
@@ -70,6 +62,9 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+      },
+      fontFamily: {
+        sans: ["Inter", "system-ui", "sans-serif"],
       },
       keyframes: {
         "accordion-down": {
