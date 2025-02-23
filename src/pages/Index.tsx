@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -134,18 +135,31 @@ const Index = () => {
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw error;
+      }
 
-      const { title, content, imagePrompt, interactionPoint } = cleanAndParseResponse(data);
+      console.log('Raw response from generate-story:', data);
+
+      // Add direct check for data structure
+      if (!data || typeof data !== 'object') {
+        throw new Error('Invalid response format from story generation');
+      }
+
+      const parsedData = cleanAndParseResponse(data);
+      console.log('Parsed story data:', parsedData);
 
       setStoryData(prev => ({
         ...prev,
-        storyTitle: title,
-        storyContent: content,
-        imagePrompt
+        storyTitle: parsedData.title,
+        storyContent: parsedData.content,
+        imagePrompt: parsedData.imagePrompt
       }));
 
-      setInteractionPoint(interactionPoint);
+      if (parsedData.interactionPoint) {
+        setInteractionPoint(parsedData.interactionPoint);
+      }
 
       toast.success("Story generated successfully!");
     } catch (error) {
@@ -185,7 +199,9 @@ const Index = () => {
     try {
       let data = response;
       
+      // If response is a string, clean markdown and parse JSON
       if (typeof response === 'string') {
+        // Remove markdown code block syntax and any whitespace
         data = response.replace(/```json\n?|```\n?/g, '').trim();
         try {
           data = JSON.parse(data);
@@ -195,6 +211,7 @@ const Index = () => {
         }
       }
 
+      // Check if we need to parse nested JSON content
       if (data.content && typeof data.content === 'string' && data.content.trim().startsWith('{')) {
         try {
           const innerJson = JSON.parse(data.content);
@@ -206,6 +223,7 @@ const Index = () => {
         }
       }
 
+      // Clean and format the data fields
       return {
         title: (data.title || '').replace(/^["']|["']$/g, '').trim(),
         content: (data.content || '')
