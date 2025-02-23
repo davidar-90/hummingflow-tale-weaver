@@ -1,3 +1,4 @@
+
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
@@ -66,15 +67,38 @@ serve(async (req) => {
       throw new Error(`Failed to generate story: ${response.statusText}`);
     }
 
-    const data = await response.json();
-    console.log('Generated story data:', data);
+    const geminiResponse = await response.json();
+    console.log('Gemini API Response:', JSON.stringify(geminiResponse, null, 2));
 
-    return new Response(JSON.stringify(data), {
+    if (!geminiResponse.candidates?.[0]?.content?.parts?.[0]?.text) {
+      throw new Error('Invalid response format from Gemini API');
+    }
+
+    // Extract the JSON string from the response and parse it
+    const jsonContent = geminiResponse.candidates[0].content.parts[0].text;
+    console.log('Raw JSON content:', jsonContent);
+    
+    // Remove markdown code block syntax if present
+    const cleanJson = jsonContent.replace(/```json\n|\n```/g, '').trim();
+    console.log('Cleaned JSON:', cleanJson);
+    
+    const storyData = JSON.parse(cleanJson);
+    console.log('Parsed story data:', storyData);
+
+    // Validate required fields
+    if (!storyData.title || !storyData.content || !storyData.imagePrompt || !storyData.interactionPoint) {
+      throw new Error('Generated story is missing required fields');
+    }
+
+    return new Response(JSON.stringify(storyData), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('Error:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error('Error in generate-story function:', error);
+    return new Response(JSON.stringify({ 
+      error: error.message,
+      details: 'Failed to generate story content'
+    }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
