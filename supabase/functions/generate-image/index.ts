@@ -31,6 +31,7 @@ serve(async (req) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json'
       },
       body: JSON.stringify([
         {
@@ -53,18 +54,27 @@ serve(async (req) => {
       ])
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('[Debug] Runware API error:', errorText);
-      throw new Error(`Failed to generate image: ${response.statusText} - ${errorText}`);
+    let data;
+    try {
+      const text = await response.text(); // First get response as text
+      console.log('[Debug] Raw response:', text);
+      data = JSON.parse(text); // Then parse it as JSON
+    } catch (parseError) {
+      console.error('[Debug] JSON parsing error:', parseError);
+      throw new Error(`Failed to parse response: ${parseError.message}`);
     }
 
-    const data = await response.json();
+    if (!response.ok) {
+      console.error('[Debug] API error response:', data);
+      throw new Error(`Failed to generate image: ${response.statusText}`);
+    }
+
     console.log('[Debug] Success response:', JSON.stringify(data, null, 2));
 
     // Extract the image URL from the response
-    const imageData = data.data.find((item: any) => item.taskType === "imageInference");
-    if (!imageData || !imageData.imageURL) {
+    const imageData = data.data?.find((item: any) => item.taskType === "imageInference");
+    if (!imageData?.imageURL) {
+      console.error('[Debug] No image data found in response:', data);
       throw new Error('No image URL in response');
     }
 
