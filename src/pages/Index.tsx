@@ -2,12 +2,14 @@
 import { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const Index = () => {
   const [storyData, setStoryData] = useState({
     therapyGoal: '',
-    communicationLevel: ''
+    communicationLevel: '',
+    studentInterests: ''
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -74,6 +76,18 @@ const Index = () => {
                     <SelectItem value="conversational">Conversational Language</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div className="form-group">
+                <Label htmlFor="studentInterests" className="text-blue-900">Student Interests</Label>
+                <Input
+                  id="studentInterests"
+                  type="text"
+                  placeholder="e.g., space, dinosaurs"
+                  value={storyData.studentInterests}
+                  onChange={(e) => handleInputChange('studentInterests', e.target.value)}
+                  className="text-input"
+                />
               </div>
             </div>
           </Card>
