@@ -1,8 +1,7 @@
-
 import { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, Feather } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { StoryForm } from "@/components/story/StoryForm";
 import { InteractionPoint } from "@/components/story/InteractionPoint";
@@ -123,8 +122,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
       <div className="container mx-auto py-12">
-        <h1 className="hero-gradient">
-          <Feather className="w-10 h-10" />
+        <h1 className="text-4xl md:text-5xl font-bold text-center mb-2 hero-gradient animate-fadeIn">
           HummingFlow Studio
         </h1>
         <p className="text-center text-blue-600/80 mb-12 animate-fadeIn">
@@ -132,11 +130,11 @@ const Index = () => {
         </p>
         
         <div className="split-panel">
-          <Card className="glass-card">
+          <Card className="glass-card p-8 animate-slideIn">
             <div className="space-y-8">
               <div>
                 <div className="flex justify-between items-center mb-8">
-                  <h2 className="section-title">Story Setup</h2>
+                  <h2 className="text-2xl font-semibold text-blue-900">Story Setup</h2>
                   <Button
                     variant="outline"
                     size="sm"
@@ -168,7 +166,7 @@ const Index = () => {
             </div>
           </Card>
 
-          <Card className="glass-card">
+          <Card className="glass-card p-8 animate-slideIn">
             <StoryEditor
               storyData={storyData}
               interactionPoint={interactionPoint}
