@@ -128,42 +128,37 @@ export const StoryForm = ({
           placeholder="e.g., space, dinosaurs"
           value={storyData.studentInterests}
           onChange={(e) => onInputChange('studentInterests', e.target.value)}
-          className="text-input"
+          className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400"
         />
       </div>
 
       <div className="form-group">
-        <div className="button-container">
+        <div className="grid grid-cols-3 gap-4">
           <Button 
-            className="action-button bg-blue-600 hover:bg-blue-700 text-white"
+            variant="default"
             onClick={onGenerateStory}
             disabled={isGenerating}
+            className="bg-blue-600 hover:bg-blue-700 text-white"
           >
             {isGenerating ? 'Generating...' : 'Generate Story'}
             <Sparkles className="ml-2 h-5 w-5" />
           </Button>
 
           <Button 
-            className={`action-button ${
-              hasStory 
-                ? 'bg-purple-600 hover:bg-purple-700 text-white' 
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            }`}
+            variant="default"
             onClick={onGenerateImage}
             disabled={!hasStory || isGeneratingImage}
+            className={hasStory ? 'bg-purple-600 hover:bg-purple-700 text-white' : 'bg-gray-300 text-gray-500'}
           >
             {isGeneratingImage ? 'Generating...' : 'Generate Image'}
             <ImageIcon className="ml-2 h-5 w-5" />
           </Button>
 
           <Button 
-            className={`action-button ${
-              hasStory 
-                ? 'bg-green-600 hover:bg-green-700 text-white' 
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-            }`}
+            variant="default"
             onClick={onGenerateVoice}
             disabled={!hasStory || isGeneratingVoice}
+            className={hasStory ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-gray-300 text-gray-500'}
           >
             {isGeneratingVoice ? 'Generating...' : 'Generate Voice'}
             <MicIcon className="ml-2 h-5 w-5" />
