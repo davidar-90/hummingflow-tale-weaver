@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -150,31 +149,11 @@ const Index = () => {
       duration: 5000
     });
 
-    if (interactionPoint.continuation && interactionPoint.continuationImagePrompt) {
-      setIsGeneratingImage(true);
-      try {
-        const { data, error } = await supabase.functions.invoke('generate-image', {
-          body: { prompt: interactionPoint.continuationImagePrompt }
-        });
-
-        if (error) throw error;
-
-        if (data.error) {
-          throw new Error(data.error);
-        }
-
-        setStoryData(prev => ({
-          ...prev,
-          continuationImage: data.imageUrl
-        }));
-
-        toast.success('Continuation image generated successfully!');
-      } catch (error) {
-        console.error('Error generating continuation image:', error);
-        toast.error('Failed to generate continuation image.');
-      } finally {
-        setIsGeneratingImage(false);
-      }
+    if (interactionPoint.continuation) {
+      setStoryData(prev => ({
+        ...prev,
+        storyContent: prev.storyContent + '\n\n' + interactionPoint.continuation
+      }));
     }
   };
 
