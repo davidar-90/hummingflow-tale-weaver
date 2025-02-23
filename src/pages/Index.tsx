@@ -24,20 +24,23 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto py-8">
-        <h1 className="text-3xl font-semibold text-gray-900 mb-8 text-center animate-fadeIn">
-          HummingBird Studio
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-white">
+      <div className="container mx-auto py-12">
+        <h1 className="text-4xl md:text-5xl font-bold text-center mb-2 hero-gradient animate-float">
+          HummingFlow Studio
         </h1>
+        <p className="text-center text-purple-600/80 mb-12 animate-fadeIn">
+          Create engaging social stories that make a difference
+        </p>
         
         <div className="split-panel">
           {/* Story Setup Panel */}
-          <Card className="p-6 bg-white shadow-sm border-gray-100">
-            <h2 className="text-xl font-medium text-gray-800 mb-6">Story Setup</h2>
+          <Card className="glass-card p-8 animate-fadeIn">
+            <h2 className="text-2xl font-semibold text-purple-900 mb-8">Story Setup</h2>
             
             <div className="space-y-6">
               <div className="form-group">
-                <Label htmlFor="title">Story Title</Label>
+                <Label htmlFor="title" className="text-purple-900">Story Title</Label>
                 <Input
                   id="title"
                   value={storyData.title}
@@ -48,7 +51,7 @@ const Index = () => {
               </div>
 
               <div className="form-group">
-                <Label htmlFor="patientName">Patient's Name</Label>
+                <Label htmlFor="patientName" className="text-purple-900">Patient's Name</Label>
                 <Input
                   id="patientName"
                   value={storyData.patientName}
@@ -59,7 +62,7 @@ const Index = () => {
               </div>
 
               <div className="form-group">
-                <Label htmlFor="age">Age</Label>
+                <Label htmlFor="age" className="text-purple-900">Age</Label>
                 <Input
                   id="age"
                   type="number"
@@ -71,7 +74,7 @@ const Index = () => {
               </div>
 
               <div className="form-group">
-                <Label htmlFor="context">Situation/Context</Label>
+                <Label htmlFor="context" className="text-purple-900">Situation/Context</Label>
                 <Textarea
                   id="context"
                   value={storyData.context}
@@ -82,7 +85,7 @@ const Index = () => {
               </div>
 
               <div className="form-group">
-                <Label htmlFor="goals">Goals/Objectives</Label>
+                <Label htmlFor="goals" className="text-purple-900">Goals/Objectives</Label>
                 <Textarea
                   id="goals"
                   value={storyData.goals}
@@ -93,7 +96,7 @@ const Index = () => {
               </div>
 
               <div className="form-group">
-                <Label htmlFor="tone">Story Tone</Label>
+                <Label htmlFor="tone" className="text-purple-900">Story Tone</Label>
                 <Select
                   value={storyData.tone}
                   onValueChange={(value) => handleInputChange('tone', value)}
@@ -111,11 +114,14 @@ const Index = () => {
             </div>
           </Card>
 
-          {/* Story Editor Panel (Placeholder) */}
-          <Card className="p-6 bg-white shadow-sm border-gray-100">
-            <h2 className="text-xl font-medium text-gray-800 mb-6">Story Editor</h2>
-            <div className="h-full flex items-center justify-center text-gray-500">
-              Story editor coming soon...
+          {/* Story Editor Panel */}
+          <Card className="glass-card p-8 animate-fadeIn">
+            <h2 className="text-2xl font-semibold text-purple-900 mb-8">Story Editor</h2>
+            <div className="h-full flex items-center justify-center text-purple-400">
+              <p className="text-center">
+                Story editor coming soon...<br/>
+                <span className="text-sm opacity-75">Your stories will come to life here</span>
+              </p>
             </div>
           </Card>
         </div>
