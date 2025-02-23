@@ -37,26 +37,43 @@ serve(async (req) => {
       - content: The main story content (2-3 paragraphs)
       - imagePrompt: A detailed visual description for generating an illustration
       - interactionPoint: {
-          prompt: A question or situation from the story
-          choices: Array of 2-4 options, each with:
+          prompt: A clear question or situation from the story that tests understanding
+          choices: Exactly three options, formatted as an array where:
+            - First option: The correct choice that demonstrates the desired behavior
+            - Second option: An incorrect but plausible alternative
+            - Third option: Another incorrect but plausible alternative
+            Each choice must have:
             - text: The choice text
-            - isCorrect: boolean
+            - isCorrect: boolean (true only for the first option)
           feedback: {
-            correct: Positive reinforcement message
-            incorrect: Gentle guidance message
+            correct: An encouraging, positive reinforcement message (e.g., "Great choice! You showed...")
+            incorrect: A supportive guidance message explaining why we should choose differently
           }
-          continuation: Text that continues the story based on making the correct choice
+          continuation: Text that continues the story showing the positive outcome from making the correct choice
           continuationImagePrompt: A detailed visual description for the continuation scene
         }
       
-      The interaction point should:
-      1. Match the student's communication level
-      2. Focus on practicing the specific therapy goal
-      3. Present clear, age-appropriate choices
-      4. Include positive feedback and reinforcement
-      5. Naturally continue the story after the interaction
+      IMPORTANT:
+      - ALWAYS include exactly three choices
+      - ALWAYS make the first choice the correct one (isCorrect: true)
+      - ALWAYS make the other two choices incorrect (isCorrect: false)
+      - ALWAYS include both correct and incorrect feedback messages
+      - Ensure all choices are age-appropriate and relate to the therapy goal
+      - Keep language clear and supportive
       
-      Keep the language clear, supportive, and engaging.`;
+      Example interaction point structure:
+      {
+        "prompt": "What should Sarah do next?",
+        "choices": [
+          {"text": "Ask politely if she can join the game", "isCorrect": true},
+          {"text": "Watch from far away without saying anything", "isCorrect": false},
+          {"text": "Start playing without asking", "isCorrect": false}
+        ],
+        "feedback": {
+          "correct": "Excellent! Asking politely shows good social skills and respect for others.",
+          "incorrect": "It's better to ask politely if you can join. This helps make new friends!"
+        }
+      }`;
 
     console.log('Sending prompt to Gemini:', prompt);
 
@@ -111,6 +128,18 @@ serve(async (req) => {
     
     try {
       const parsedResponse = JSON.parse(cleanedResponse) as StoryResponse;
+      
+      // Validate the interaction point structure
+      if (parsedResponse.interactionPoint) {
+        if (!Array.isArray(parsedResponse.interactionPoint.choices) || 
+            parsedResponse.interactionPoint.choices.length !== 3 ||
+            !parsedResponse.interactionPoint.choices[0]?.isCorrect ||
+            parsedResponse.interactionPoint.choices[1]?.isCorrect ||
+            parsedResponse.interactionPoint.choices[2]?.isCorrect) {
+          throw new Error('Invalid interaction point structure');
+        }
+      }
+
       return new Response(JSON.stringify(parsedResponse), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200
