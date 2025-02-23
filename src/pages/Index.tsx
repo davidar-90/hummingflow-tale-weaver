@@ -48,8 +48,10 @@ const Index = () => {
     
     setIsGeneratingImage(true);
     try {
+      const prompt = storyData.continuationImagePrompt || storyData.imagePrompt || storyData.storyContent;
+      
       const { data, error } = await supabase.functions.invoke('generate-image', {
-        body: { prompt: storyData.imagePrompt || storyData.storyContent }
+        body: { prompt }
       });
 
       if (error) throw error;
@@ -62,7 +64,7 @@ const Index = () => {
       
       setStoryData(prev => ({
         ...prev,
-        storyImage: data.imageUrl
+        [storyData.continuationImagePrompt ? 'continuationImage' : 'storyImage']: data.imageUrl,
       }));
 
       toast.success('Image generated successfully!');
@@ -152,7 +154,8 @@ const Index = () => {
     if (interactionPoint.continuation) {
       setStoryData(prev => ({
         ...prev,
-        storyContent: prev.storyContent + '\n\n' + interactionPoint.continuation
+        storyContent: prev.storyContent + '\n\n' + interactionPoint.continuation,
+        continuationImagePrompt: interactionPoint.continuationImagePrompt
       }));
     }
   };

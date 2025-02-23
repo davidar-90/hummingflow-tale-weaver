@@ -10,6 +10,7 @@ export interface StoryData {
   storyImage: string;
   continuationImage: string;
   imagePrompt?: string;
+  continuationImagePrompt?: string;  // Added this field
 }
 
 export interface Choice {
