@@ -6,7 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const IMAGEN_API_URL = 'https://generativelanguage.googleapis.com/v1/models/imagen-3.0-generate-002:generateImages';
+const VERTEX_AI_URL = 'https://us-central1-aiplatform.googleapis.com/v1/projects/PROJECT_ID/locations/us-central1/publishers/google/models/imagegeneration:generateImage';
 const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
 
 serve(async (req) => {
@@ -19,22 +19,23 @@ serve(async (req) => {
     console.log('[Debug] API Key available:', !!GEMINI_API_KEY);
     console.log('[Debug] Received prompt:', prompt);
 
-    // Ensure the request matches exactly what the Python client would send
     const request = {
-      contents: [{
-        parts: [{
-          text: `High quality digital illustration in a friendly children's book style: ${prompt}`
-        }]
-      }]
+      instances: [{
+        prompt: `High quality digital illustration in a friendly children's book style: ${prompt}`
+      }],
+      parameters: {
+        sampleCount: 1,
+        aspectRatio: "16:9"
+      }
     };
 
     console.log('[Debug] Request payload:', JSON.stringify(request, null, 2));
-    console.log('[Debug] Full API URL:', `${IMAGEN_API_URL}?key=${GEMINI_API_KEY?.substring(0, 5)}...`);
 
-    const response = await fetch(`${IMAGEN_API_URL}?key=${GEMINI_API_KEY}`, {
+    const response = await fetch(VERTEX_AI_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': `Bearer ${GEMINI_API_KEY}`
       },
       body: JSON.stringify(request)
     });
