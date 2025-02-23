@@ -33,8 +33,8 @@ serve(async (req) => {
       throw new Error('Text is required')
     }
 
-    // Using Cassidy's voice ID - Voice ID: "ODq5zmih8GrVes37Dizd"
-    const CASSIDY_VOICE_ID = "ODq5zmih8GrVes37Dizd"
+    // Using Cassidy's correct voice ID
+    const CASSIDY_VOICE_ID = "56AoDkrOh6qfVPDXZ7Pt"
     
     const response = await fetch(
       `https://api.elevenlabs.io/v1/text-to-speech/${CASSIDY_VOICE_ID}`,
