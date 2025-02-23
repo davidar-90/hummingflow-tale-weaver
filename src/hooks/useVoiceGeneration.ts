@@ -18,12 +18,22 @@ export const useVoiceGeneration = () => {
       });
 
       if (error) throw error;
+      
+      // Check if the response contains an error message
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
+      // Check if we have valid audio content
       if (!data?.audioContent) {
         throw new Error('Failed to generate voice audio');
       }
 
       setAudioContent(data.audioContent);
       return data.audioContent;
+    } catch (error) {
+      console.error('Voice generation error:', error);
+      throw error;
     } finally {
       setIsGeneratingVoice(false);
     }
