@@ -365,47 +365,47 @@ const Index = () => {
                 />
               </div>
               
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="form-group col-span-2 md:col-span-1">
+              <div className="space-y-4">
+                <div className="form-group">
+                  <Label className="text-blue-900">Story Image</Label>
+                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50 flex flex-col items-center justify-center aspect-video w-full">
+                    <div className="w-full h-full flex items-center justify-center">
+                      <p className="text-gray-400 text-center">Initial story image will appear here (16:9)</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="form-group">
                   <Label htmlFor="storyContent" className="text-blue-900">Story Content</Label>
                   <Textarea
                     id="storyContent"
                     placeholder="Story content will appear here..."
                     value={storyData.storyContent}
                     onChange={(e) => handleInputChange('storyContent', e.target.value)}
-                    className={`min-h-[400px] text-input resize-none bg-white/50 ${storyData.storyContent ? 'text-black' : 'text-gray-500'} whitespace-pre-wrap`}
+                    className={`min-h-[200px] text-input resize-none bg-white/50 ${storyData.storyContent ? 'text-black' : 'text-gray-500'} whitespace-pre-wrap`}
                   />
-                </div>
-
-                <div className="form-group col-span-2 md:col-span-1">
-                  <Label className="text-blue-900">Story Image</Label>
-                  <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50 flex flex-col items-center justify-center min-h-[400px]">
-                    <div className="w-full h-full flex items-center justify-center">
-                      <p className="text-gray-400 text-center">Initial story image will appear here</p>
-                    </div>
-                  </div>
                 </div>
               </div>
 
               {interactionPoint?.selectedChoice !== undefined && (
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="form-group col-span-2 md:col-span-1">
+                <div className="space-y-4">
+                  <div className="form-group">
+                    <Label className="text-blue-900">Continuation Image</Label>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50 flex flex-col items-center justify-center aspect-video w-full">
+                      <div className="w-full h-full flex items-center justify-center">
+                        <p className="text-gray-400 text-center">Continuation image will appear here (16:9)</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="form-group">
                     <Label htmlFor="continuation" className="text-blue-900">Story Continuation</Label>
                     <Textarea
                       id="continuation"
                       value={interactionPoint.continuation}
                       readOnly
-                      className="min-h-[400px] text-input resize-none bg-white/50 text-black whitespace-pre-wrap"
+                      className="min-h-[200px] text-input resize-none bg-white/50 text-black whitespace-pre-wrap"
                     />
-                  </div>
-
-                  <div className="form-group col-span-2 md:col-span-1">
-                    <Label className="text-blue-900">Continuation Image</Label>
-                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50 flex flex-col items-center justify-center min-h-[400px]">
-                      <div className="w-full h-full flex items-center justify-center">
-                        <p className="text-gray-400 text-center">Continuation image will appear here</p>
-                      </div>
-                    </div>
                   </div>
                 </div>
               )}
