@@ -8,6 +8,10 @@ const corsHeaders = {
 
 const API_ENDPOINT = "https://api.runware.ai/v1";
 
+// Calculate 16:9 height for 1024px width
+const WIDTH = 1024;
+const HEIGHT = Math.floor(WIDTH * (9/16)); // This will be 576px
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -36,10 +40,10 @@ serve(async (req) => {
         {
           taskType: "imageInference",
           taskUUID: crypto.randomUUID(),
-          positivePrompt: prompt,
-          model: "runware:100@1",
-          width: 1024,
-          height: 1024,
+          positivePrompt: `High quality digital illustration in a friendly children's book style: ${prompt}`,
+          model: "runware:100@1", // Using runware:100@1 for stable, high-quality children's book style illustrations
+          width: WIDTH,
+          height: HEIGHT, // Using 16:9 aspect ratio
           numberResults: 1,
           outputFormat: "WEBP",
           CFGScale: 1,
