@@ -40,7 +40,7 @@ const Index = () => {
     toast.success("Story cleared successfully!");
   };
 
-  const generateImage = async (isContinuation: boolean = false) => {
+  const generateImage = async (generateBoth: boolean = true) => {
     if (!storyData.storyContent) {
       toast.error("Please generate a story first");
       return;
@@ -48,34 +48,48 @@ const Index = () => {
     
     setIsGeneratingImage(true);
     try {
-      const prompt = isContinuation 
-        ? storyData.continuationImagePrompt || interactionPoint?.continuation || ''
-        : storyData.imagePrompt || storyData.storyContent;
+      const storyPrompt = storyData.imagePrompt || storyData.storyContent;
+      console.log('Using story image prompt:', storyPrompt);
       
-      console.log('Using image prompt:', prompt);
-      console.log('Image prompt source:', isContinuation ? 'continuation' : 'initial');
-      
-      const { data, error } = await supabase.functions.invoke('generate-image', {
-        body: { prompt }
+      const { data: storyImageData, error: storyImageError } = await supabase.functions.invoke('generate-image', {
+        body: { prompt: storyPrompt }
       });
 
-      if (error) throw error;
+      if (storyImageError) throw storyImageError;
+      if (storyImageData.error) throw new Error(storyImageData.error);
 
-      if (data.error) {
-        throw new Error(data.error);
-      }
-
-      console.log('Image generation response:', data);
+      console.log('Story image generation response:', storyImageData);
       
       setStoryData(prev => ({
         ...prev,
-        [isContinuation ? 'continuationImage' : 'storyImage']: data.imageUrl,
+        storyImage: storyImageData.imageUrl
       }));
 
-      toast.success(`${isContinuation ? 'Continuation image' : 'Story image'} generated successfully!`);
+      if (generateBoth && interactionPoint?.continuation && storyData.continuationImagePrompt) {
+        const continuationPrompt = storyData.continuationImagePrompt;
+        console.log('Using continuation image prompt:', continuationPrompt);
+        
+        const { data: continuationImageData, error: continuationImageError } = await supabase.functions.invoke('generate-image', {
+          body: { prompt: continuationPrompt }
+        });
+
+        if (continuationImageError) throw continuationImageError;
+        if (continuationImageData.error) throw new Error(continuationImageData.error);
+
+        console.log('Continuation image generation response:', continuationImageData);
+        
+        setStoryData(prev => ({
+          ...prev,
+          continuationImage: continuationImageData.imageUrl
+        }));
+
+        toast.success("Both images generated successfully!");
+      } else {
+        toast.success("Story image generated successfully!");
+      }
     } catch (error) {
-      console.error('Error generating image:', error);
-      toast.error('Failed to generate image. Please try again.');
+      console.error('Error generating images:', error);
+      toast.error('Failed to generate images. Please try again.');
     } finally {
       setIsGeneratingImage(false);
     }
@@ -162,8 +176,6 @@ const Index = () => {
         storyContent: prev.storyContent + '\n\n' + interactionPoint.continuation,
         continuationImagePrompt: interactionPoint.continuationImagePrompt
       }));
-
-      await generateImage(true);
     }
   };
 
