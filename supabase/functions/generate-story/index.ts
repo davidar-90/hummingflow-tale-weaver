@@ -90,21 +90,25 @@ async function generateImagePrompt(title: string, content: string, isInitial: bo
     body: JSON.stringify({
       contents: [{
         parts: [{
-          text: `Create a detailed image prompt for the following ${isInitial ? 'story' : 'story continuation'}:
+          text: `You are an expert at creating image generation prompts. I need a detailed image prompt for this ${isInitial ? 'story' : 'continuation'}:
 
-          Title: ${title}
-          ${isInitial ? 'Content' : 'Continuation'}: ${content}
+Title: ${title}
+${isInitial ? 'Story' : 'Continuation'}: ${content}
 
-          Guidelines for the image prompt:
-          - Be specific and detailed about what should be in the scene
-          - Focus on the main action or emotion of the story
-          - Describe visual elements like lighting, perspective, and style
-          - Specify it should be in a friendly, children's illustration style
-          - Include mood and atmosphere descriptions
-          
-          Return ONLY the image prompt text, no additional formatting or explanation.`
+Create a highly detailed prompt for an illustration that captures the key moment of this story. The prompt should:
+1. Describe the main characters and their emotions
+2. Detail the setting and environment
+3. Specify the art style as "friendly children's illustration style"
+4. Include lighting and atmosphere details
+5. Focus on positive, engaging imagery
+
+Write your response as a single, detailed image prompt with no additional text, explanations, or markdown.`
         }]
-      }]
+      }],
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 200
+      }
     })
   });
 
@@ -116,7 +120,17 @@ async function generateImagePrompt(title: string, content: string, isInitial: bo
   const geminiResponse = await response.json();
   console.log('Raw image prompt response:', JSON.stringify(geminiResponse, null, 2));
   
-  const imagePrompt = geminiResponse.candidates[0].content.parts[0].text.trim();
+  if (!geminiResponse.candidates?.[0]?.content?.parts?.[0]?.text) {
+    console.error('Invalid image prompt response format:', geminiResponse);
+    throw new Error('Invalid response format from Gemini API for image prompt');
+  }
+
+  const imagePrompt = geminiResponse.candidates[0].content.parts[0].text
+    .trim()
+    .replace(/^["']|["']$/g, '') // Remove any quotes
+    .replace(/```|\n/g, ' ') // Remove any markdown and newlines
+    .trim();
+  
   console.log('Generated image prompt:', imagePrompt);
   
   return imagePrompt;
