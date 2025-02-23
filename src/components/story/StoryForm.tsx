@@ -15,6 +15,7 @@ interface StoryFormProps {
   onGenerateVoice: () => Promise<void>;
   isGenerating: boolean;
   isGeneratingImage: boolean;
+  isGeneratingVoice: boolean;
   onClearStory: () => void;
 }
 
@@ -26,6 +27,7 @@ export const StoryForm = ({
   onGenerateVoice,
   isGenerating,
   isGeneratingImage,
+  isGeneratingVoice,
   onClearStory
 }: StoryFormProps) => {
   const hasStory = Boolean(storyData.storyContent);
@@ -160,9 +162,9 @@ export const StoryForm = ({
                 : 'bg-gray-300 text-gray-500 cursor-not-allowed'
             }`}
             onClick={onGenerateVoice}
-            disabled={!hasStory}
+            disabled={!hasStory || isGeneratingVoice}
           >
-            Generate Voice
+            {isGeneratingVoice ? 'Generating...' : 'Generate Voice'}
             <MicIcon className="ml-2 h-5 w-5" />
           </Button>
         </div>

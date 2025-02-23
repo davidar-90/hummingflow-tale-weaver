@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,8 @@ import { StoryEditor } from "@/components/story/StoryEditor";
 import { StoryData, InteractionPointType } from '@/types/story';
 import { useStoryGeneration } from "@/hooks/useStoryGeneration";
 import { useImageGeneration } from "@/hooks/useImageGeneration";
+import { useVoiceGeneration } from "@/hooks/useVoiceGeneration";
+import { StoryAudioPlayer } from "@/components/story/StoryAudioPlayer";
 
 const Index = () => {
   const initialStoryData: StoryData = {
@@ -27,6 +28,7 @@ const Index = () => {
   const [storyData, setStoryData] = useState<StoryData>(initialStoryData);
   const { generateStory, isGenerating, interactionPoint, setInteractionPoint } = useStoryGeneration();
   const { generateImage, isGeneratingImage } = useImageGeneration();
+  const { generateVoice, isGeneratingVoice, audioContent } = useVoiceGeneration();
 
   const handleInputChange = (field: string, value: string) => {
     setStoryData(prev => ({
@@ -74,13 +76,18 @@ const Index = () => {
     }
   };
 
-  const generateVoice = async () => {
+  const handleGenerateVoice = async () => {
     if (!storyData.storyContent) {
       toast.error("Please generate a story first");
       return;
     }
     
-    toast.info("Voice generation coming soon!");
+    try {
+      await generateVoice(storyData.storyContent);
+      toast.success("Voice generated successfully!");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Failed to generate voice. Please try again.");
+    }
   };
 
   const handleChoiceSelection = async (index: number) => {
@@ -140,9 +147,10 @@ const Index = () => {
                   onInputChange={handleInputChange}
                   onGenerateStory={handleGenerateStory}
                   onGenerateImage={handleGenerateImage}
-                  onGenerateVoice={generateVoice}
+                  onGenerateVoice={handleGenerateVoice}
                   isGenerating={isGenerating}
                   isGeneratingImage={isGeneratingImage}
+                  isGeneratingVoice={isGeneratingVoice}
                   onClearStory={clearStory}
                 />
               </div>
@@ -160,6 +168,10 @@ const Index = () => {
               storyData={storyData}
               interactionPoint={interactionPoint}
               onInputChange={handleInputChange}
+            />
+            <StoryAudioPlayer
+              audioContent={audioContent}
+              isGenerating={isGeneratingVoice}
             />
           </Card>
         </div>
