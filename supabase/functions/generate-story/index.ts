@@ -8,8 +8,12 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { 
+      status: 200,
+      headers: corsHeaders 
+    });
   }
 
   try {
@@ -17,7 +21,23 @@ serve(async (req) => {
     const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
 
     if (!GEMINI_API_KEY) {
-      throw new Error('API key not configured');
+      return new Response(
+        JSON.stringify({ error: 'API key not configured' }),
+        { 
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    if (!requestData.therapyGoal || !requestData.ageGroup || !requestData.communicationLevel) {
+      return new Response(
+        JSON.stringify({ error: 'Missing required parameters' }),
+        { 
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
 
     const messages: CreateChatCompletionRequestMessage[] = [
@@ -26,6 +46,8 @@ serve(async (req) => {
         content: `Create a social story focusing on ${requestData.therapyGoal} for a ${requestData.ageGroup} student with ${requestData.communicationLevel} communication level. Their interests include: ${requestData.studentInterests}. ${requestData.systemInstructions}`
       }
     ];
+
+    console.log('Sending request to Gemini API with message:', messages[0].content);
 
     const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent', {
       method: 'POST',
@@ -70,7 +92,26 @@ serve(async (req) => {
     console.log('Raw API response:', JSON.stringify(data, null, 2));
 
     if (!response.ok) {
-      throw new Error(`API request failed: ${response.statusText}`);
+      return new Response(
+        JSON.stringify({ 
+          error: `API request failed: ${response.statusText}`,
+          details: data
+        }),
+        { 
+          status: response.status,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid response format from API' }),
+        { 
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
 
     const storyContent = data.candidates[0].content.parts[0].text;
@@ -79,27 +120,53 @@ serve(async (req) => {
     // Try to parse the story content as JSON, removing potential markdown formatting
     let parsedStory;
     try {
-      // Remove markdown code block syntax if present
-      const cleanContent = storyContent.replace(/```json\s*|\s*```/g, '');
+      // Remove markdown code block syntax and any leading/trailing whitespace
+      const cleanContent = storyContent
+        .replace(/```json\s*|\s*```/g, '')
+        .trim();
+      
+      console.log('Cleaned content:', cleanContent);
+      
       parsedStory = JSON.parse(cleanContent);
+      
+      // Validate the parsed story has required fields
+      if (!parsedStory.title || !parsedStory.content) {
+        throw new Error('Missing required story fields');
+      }
     } catch (error) {
       console.error('Failed to parse story JSON:', error);
-      throw new Error('Invalid story format received from API');
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid story format received from API',
+          details: error.message,
+          content: storyContent
+        }),
+        { 
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
     }
 
-    // Return the parsed story data
+    // Return the parsed story data with explicit 200 status
     return new Response(
       JSON.stringify(parsedStory),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { 
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      }
     );
 
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Unexpected error:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: 'Internal server error',
+        details: error.message
+      }),
       { 
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       }
     );
   }
