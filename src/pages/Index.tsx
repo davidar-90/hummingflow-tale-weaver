@@ -10,7 +10,8 @@ const Index = () => {
     therapyGoal: '',
     communicationLevel: '',
     supportCues: '',
-    studentInterests: ''
+    studentInterests: '',
+    storyTitle: ''
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -117,11 +118,25 @@ const Index = () => {
           {/* Story Editor Panel */}
           <Card className="glass-card p-8">
             <h2 className="text-2xl font-semibold text-blue-900 mb-8">Story Editor</h2>
-            <div className="h-full flex items-center justify-center text-blue-400">
-              <p className="text-center">
-                Story editor coming soon...<br/>
-                <span className="text-sm opacity-75">Your stories will come to life here</span>
-              </p>
+            <div className="space-y-6">
+              <div className="form-group">
+                <Label htmlFor="storyTitle" className="text-blue-900">Title</Label>
+                <Input
+                  id="storyTitle"
+                  type="text"
+                  placeholder="Story title..."
+                  value={storyData.storyTitle}
+                  onChange={(e) => handleInputChange('storyTitle', e.target.value)}
+                  className="text-input"
+                />
+              </div>
+              
+              <div className="h-full flex items-center justify-center text-blue-400">
+                <p className="text-center">
+                  Story editor coming soon...<br/>
+                  <span className="text-sm opacity-75">Your stories will come to life here</span>
+                </p>
+              </div>
             </div>
           </Card>
         </div>
