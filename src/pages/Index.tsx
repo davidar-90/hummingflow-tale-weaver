@@ -179,24 +179,31 @@ const Index = () => {
         .replace(/^["']|["']$/g, '')
         .trim();
 
+      const interactionPoint = data.interactionPoint ? {
+        prompt: data.interactionPoint.prompt || '',
+        choices: Array.isArray(data.interactionPoint.choices) 
+          ? data.interactionPoint.choices 
+          : [],
+        feedback: data.interactionPoint.feedback || {
+          correct: '',
+          incorrect: ''
+        },
+        continuation: data.interactionPoint.continuation || '',
+        continuationImagePrompt: data.interactionPoint.continuationImagePrompt || ''
+      } : null;
+
       console.log('Cleaned data:', { 
         title, 
         content, 
-        imagePrompt: data.imagePrompt,
-        interactionPoint: {
-          ...data.interactionPoint,
-          continuationImagePrompt: data.interactionPoint?.continuationImagePrompt
-        }
+        imagePrompt: data.imagePrompt || '',
+        interactionPoint
       });
 
       return { 
         title, 
         content,
-        imagePrompt: data.imagePrompt,
-        interactionPoint: {
-          ...data.interactionPoint,
-          continuationImagePrompt: data.interactionPoint?.continuationImagePrompt
-        }
+        imagePrompt: data.imagePrompt || '',
+        interactionPoint
       };
     } catch (error) {
       console.error('Error parsing response:', error);
@@ -358,7 +365,7 @@ const Index = () => {
                   </h3>
                 </div>
                 
-                {interactionPoint ? (
+                {interactionPoint && Array.isArray(interactionPoint.choices) ? (
                   <div className="space-y-4">
                     <p className="text-gray-800 font-medium p-4 bg-gray-50 rounded-lg border border-gray-100">
                       {interactionPoint.prompt}
