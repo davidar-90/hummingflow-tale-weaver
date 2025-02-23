@@ -51,7 +51,7 @@ serve(async (req) => {
           positivePrompt: prompt,
           model: "runware:100@1",
           width: 1024,
-          height: 1024,
+          height: 576, // Changed to 16:9 aspect ratio (1024x576)
           numberResults: 1,
           outputFormat: "WEBP",
           CFGScale: 1,
