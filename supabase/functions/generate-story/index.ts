@@ -1,11 +1,13 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import "https://deno.land/x/xhr@0.1.0/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent';
+const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY2');
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -22,11 +24,7 @@ serve(async (req) => {
       systemInstructions
     } = await req.json();
 
-    const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
-    if (!openAIApiKey) {
-      throw new Error('OpenAI API key not found');
-    }
-
+    console.log('[Debug] API Key available:', !!GEMINI_API_KEY);
     console.log('[Debug] Generating story with inputs:', {
       therapyGoal,
       ageGroup,
@@ -73,39 +71,38 @@ Format the response as a JSON object with the following structure:
   }
 }`;
 
-    console.log('[Debug] Sending request to OpenAI');
+    console.log('[Debug] Sending request to Gemini');
 
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        messages: [
-          { 
-            role: 'system', 
-            content: 'You are a helpful assistant that creates engaging social stories for children.' 
-          },
-          { 
-            role: 'user', 
-            content: prompt 
-          }
-        ],
-      }),
+        contents: [{
+          parts: [{
+            text: prompt
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.7,
+          topK: 32,
+          topP: 1,
+          maxOutputTokens: 2048,
+        },
+      })
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('[Debug] OpenAI API error:', errorText);
-      throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
+      console.error('[Debug] Gemini API error:', errorText);
+      throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
     }
 
     const data = await response.json();
-    console.log('[Debug] OpenAI response:', JSON.stringify(data, null, 2));
+    console.log('[Debug] Gemini response:', JSON.stringify(data, null, 2));
 
-    const generatedContent = data.choices[0].message.content;
+    const generatedContent = data.candidates[0].content.parts[0].text;
     console.log('[Debug] Generated content:', generatedContent);
 
     return new Response(generatedContent, {
