@@ -6,7 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1/models/gemini-pro-vision:generateContent';
+const IMAGEN_API_URL = 'https://generativelanguage.googleapis.com/v1/models/imagen-3.0-generate-002:generateImages';
 const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
 
 serve(async (req) => {
@@ -20,21 +20,13 @@ serve(async (req) => {
     console.log('[Debug] Received prompt:', prompt);
 
     const request = {
-      contents: [{
-        parts: [{
-          text: `Generate an image: High quality digital illustration in a friendly children's book style: ${prompt}`
-        }]
-      }],
-      generationConfig: {
-        temperature: 0.9,
-        topK: 32,
-        topP: 1
-      }
+      prompt: `High quality digital illustration in a friendly children's book style: ${prompt}`,
+      numberOfImages: 1
     };
 
     console.log('[Debug] Request payload:', JSON.stringify(request, null, 2));
 
-    const response = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+    const response = await fetch(`${IMAGEN_API_URL}?key=${GEMINI_API_KEY}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
