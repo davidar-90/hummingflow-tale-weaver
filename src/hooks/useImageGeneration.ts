@@ -20,12 +20,11 @@ export const useImageGeneration = () => {
         ? `Main characters: ${uniqueCharacters.join(', ')}. `
         : '';
 
-      // Define consistent style and setting
-      const baseStyle = "Professional storybook illustration style, modern aesthetic, soft lighting, detailed environment";
-      const artDirection = "Use vibrant colors, dynamic composition, and consistent character designs throughout";
+      // Define consistent style for all images
+      const baseStyle = "Generate an image with a dynamic, stylized animation aesthetic, reminiscent of a modern comic book or graphic novel. Employ vibrant, saturated colors with layered, textured overlays and halftone patterns. Use strong, exaggerated motion blur and speed lines to convey kinetic energy. Incorporate bold ink lines and fragmented imagery, with a focus on dynamic perspective. The overall feel should be energetic and visually diverse, similar to a pop art inspired animation.";
       
       // Generate initial story image with enhanced context
-      const storyPrompt = `${baseStyle}. ${characterContext}Scene: ${imagePrompt || storyContent}. ${artDirection}`;
+      const storyPrompt = `${baseStyle} Scene: ${imagePrompt || storyContent}. ${characterContext}`;
       console.log('Using story image prompt:', storyPrompt);
       
       const { data: storyImageData, error: storyImageError } = await supabase.functions.invoke('generate-image', {
@@ -38,7 +37,7 @@ export const useImageGeneration = () => {
       let continuationImage = null;
       // Generate continuation image if available
       if (continuationImagePrompt) {
-        const continuationPrompt = `${baseStyle}. ${characterContext}Scene: ${continuationImagePrompt}. ${artDirection}. Maintain exact same character appearances, clothing, and art style as the previous image for consistency.`;
+        const continuationPrompt = `${baseStyle} Scene: ${continuationImagePrompt}. ${characterContext} Maintain exact same character appearances, clothing, and art style as the previous image for consistency.`;
         console.log('Using continuation image prompt:', continuationPrompt);
         
         const { data: continuationImageData, error: continuationImageError } = await supabase.functions.invoke('generate-image', {
