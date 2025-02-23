@@ -22,8 +22,10 @@ export const StoryEditor = ({
 }: StoryEditorProps) => {
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center mb-4">
-        <Label htmlFor="storyTitle" className="text-lg font-medium text-gray-900">Title</Label>
+      <div className="flex justify-between items-center mb-8">
+        <h2 className="text-2xl font-semibold bg-gradient-to-br from-gray-800 to-gray-600 bg-clip-text text-transparent">
+          Story Preview
+        </h2>
         <StoryAudioPlayer 
           audioContent={audioContent}
           isGenerating={isGeneratingVoice}
@@ -31,19 +33,20 @@ export const StoryEditor = ({
       </div>
 
       <div className="form-group">
+        <Label htmlFor="storyTitle" className="input-label text-base">Title</Label>
         <Input
           id="storyTitle"
           type="text"
           placeholder="Story title..."
           value={storyData.storyTitle}
           onChange={(e) => onInputChange('storyTitle', e.target.value)}
-          className={`text-input ${storyData.storyTitle ? 'text-gray-900' : 'text-gray-500'}`}
+          className={`text-input text-lg font-medium ${storyData.storyTitle ? 'text-gray-900' : 'text-gray-500'}`}
         />
       </div>
       
       <div className="space-y-4">
         <div className="form-group">
-          <Label htmlFor="storyContent" className="text-lg font-medium text-gray-900">Story Content</Label>
+          <Label htmlFor="storyContent" className="input-label text-base">Story Content</Label>
           <Textarea
             id="storyContent"
             placeholder="Story content will appear here..."
@@ -54,8 +57,8 @@ export const StoryEditor = ({
         </div>
 
         <div className="form-group">
-          <Label className="text-lg font-medium text-gray-900">Story Image</Label>
-          <div className="border-2 border-dashed border-gray-200 rounded-lg p-4 bg-white/50 flex flex-col items-center justify-center aspect-video w-full transition-colors hover:border-apple-blue/30">
+          <Label className="input-label text-base">Story Image</Label>
+          <div className="border-2 border-dashed border-gray-200 rounded-lg p-4 bg-white/50 flex flex-col items-center justify-center aspect-video w-full transition-colors hover:border-purple-400/30">
             {storyData.storyImage ? (
               <img
                 src={storyData.storyImage}
@@ -74,7 +77,7 @@ export const StoryEditor = ({
       {interactionPoint?.selectedChoice !== undefined && (
         <div className="space-y-4">
           <div className="form-group">
-            <Label htmlFor="continuation" className="text-lg font-medium text-gray-900">Story Continuation</Label>
+            <Label htmlFor="continuation" className="input-label text-base">Story Continuation</Label>
             <Textarea
               id="continuation"
               value={interactionPoint.continuation}
@@ -84,8 +87,8 @@ export const StoryEditor = ({
           </div>
 
           <div className="form-group">
-            <Label className="text-lg font-medium text-gray-900">Continuation Image</Label>
-            <div className="border-2 border-dashed border-gray-200 rounded-lg p-4 bg-white/50 flex flex-col items-center justify-center aspect-video w-full transition-colors hover:border-apple-blue/30">
+            <Label className="input-label text-base">Continuation Image</Label>
+            <div className="border-2 border-dashed border-gray-200 rounded-lg p-4 bg-white/50 flex flex-col items-center justify-center aspect-video w-full transition-colors hover:border-purple-400/30">
               {storyData.continuationImage ? (
                 <img
                   src={storyData.continuationImage}
