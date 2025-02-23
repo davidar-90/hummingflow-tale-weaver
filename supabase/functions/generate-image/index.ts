@@ -62,7 +62,7 @@ serve(async (req) => {
           taskType: "imageInference",
           taskUUID: crypto.randomUUID(),
           positivePrompt: `Generate an image with a dynamic, stylized animation aesthetic, reminiscent of a modern comic book or graphic novel: ${prompt}. Employ vibrant, saturated colors with layered, textured overlays and halftone patterns. Use strong, exaggerated motion blur and speed lines to convey kinetic energy. Incorporate bold ink lines and fragmented imagery, with a focus on dynamic perspective. The overall feel should be energetic and visually diverse, similar to a pop art inspired animation.`,
-          model: "runware:flux1@1",
+          model: "runware:100@1",  // Changed to use the correct model identifier
           width: WIDTH,
           height: HEIGHT,
           numberResults: 1,
