@@ -121,26 +121,30 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-apple-gray">
-      <div className="container mx-auto py-12">
-        <h1 className="text-4xl md:text-5xl font-bold text-center mb-2 hero-gradient animate-fadeIn">
-          HummingFlow Studio
-        </h1>
-        <p className="text-center text-gray-600 mb-12 animate-fadeIn">
-          Create engaging social stories that make a difference
-        </p>
+    <div className="min-h-screen">
+      <div className="container mx-auto py-12 px-4 sm:px-6">
+        <div className="max-w-4xl mx-auto text-center mb-16 animate-float">
+          <h1 className="text-5xl md:text-6xl font-bold mb-4 hero-gradient tracking-tight">
+            HummingFlow Studio
+          </h1>
+          <p className="text-lg md:text-xl hero-subtitle">
+            Create engaging social stories that make a difference
+          </p>
+        </div>
         
         <div className="split-panel">
-          <Card className="glass-card p-8 animate-slideIn">
+          <Card className="glass-card feather-card rounded-2xl p-8 animate-slideIn">
             <div className="space-y-8">
               <div>
                 <div className="flex justify-between items-center mb-8">
-                  <h2 className="text-2xl font-semibold text-gray-900">Story Setup</h2>
+                  <h2 className="text-2xl font-semibold bg-gradient-to-br from-gray-800 to-gray-600 bg-clip-text text-transparent">
+                    Story Setup
+                  </h2>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={clearStory}
-                    className="text-gray-600 hover:text-apple-blue hover:border-apple-blue/30"
+                    className="text-gray-600 hover:text-blue-600 hover:border-blue-400/30 transition-colors duration-300"
                   >
                     <RefreshCw className="h-4 w-4 mr-2" />
                     Clear Story
@@ -167,7 +171,7 @@ const Index = () => {
             </div>
           </Card>
 
-          <Card className="glass-card p-8 animate-slideIn">
+          <Card className="glass-card feather-card rounded-2xl p-8 animate-slideIn">
             <StoryEditor
               storyData={storyData}
               interactionPoint={interactionPoint}
