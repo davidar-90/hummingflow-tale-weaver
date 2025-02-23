@@ -131,8 +131,6 @@ const Index = () => {
 
       setInteractionPoint(interactionPoint);
 
-      await generateImage(false);
-
       toast.success("Story generated successfully!");
     } catch (error) {
       console.error('Error generating story:', error);
