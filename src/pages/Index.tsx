@@ -18,10 +18,13 @@ const Index = () => {
     supportCues: '',
     studentInterests: '',
     storyTitle: '',
-    storyContent: ''
+    storyContent: '',
+    storyImage: '',
+    continuationImage: ''
   };
 
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isGeneratingImage, setIsGeneratingImage] = useState(false);
   const [storyData, setStoryData] = useState(initialStoryData);
   const [interactionPoint, setInteractionPoint] = useState<{
     prompt: string;
@@ -44,7 +47,83 @@ const Index = () => {
     toast.success("Story cleared successfully!");
   };
 
-  const handleChoiceSelection = (index: number) => {
+  const generateImage = async (prompt: string, isInitialStory: boolean = true) => {
+    setIsGeneratingImage(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-image', {
+        body: { prompt }
+      });
+
+      if (error) throw error;
+
+      const imageUrl = data.candidates[0].content.parts[0].text;
+      
+      setStoryData(prev => ({
+        ...prev,
+        [isInitialStory ? 'storyImage' : 'continuationImage']: imageUrl
+      }));
+
+      toast.success(`Image generated successfully for ${isInitialStory ? 'story' : 'continuation'}!`);
+    } catch (error) {
+      console.error('Error generating image:', error);
+      toast.error('Failed to generate image. Please try again.');
+    } finally {
+      setIsGeneratingImage(false);
+    }
+  };
+
+  const generateStory = async () => {
+    if (!storyData.therapyGoal || !storyData.ageGroup || !storyData.communicationLevel || !storyData.studentInterests) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-story', {
+        body: {
+          therapyGoal: storyData.therapyGoal,
+          ageGroup: storyData.ageGroup,
+          communicationLevel: storyData.communicationLevel,
+          supportCues: storyData.supportCues,
+          studentInterests: storyData.studentInterests,
+          systemInstructions: `Create an engaging social story with a positive, supportive interaction point.
+            The interaction should:
+            - Focus on practicing positive behaviors and choices
+            - Avoid depicting negative or mean behaviors
+            - Present realistic, age-appropriate scenarios for ${storyData.ageGroup}
+            - Use vocabulary and concepts appropriate for ${storyData.ageGroup}
+            - Encourage empathy and understanding
+            - Maintain a supportive and encouraging tone
+            - Relate directly to the therapy goal
+            - Use language appropriate for the student's communication level`
+        }
+      });
+
+      if (error) throw error;
+
+      const { title, content, interactionPoint } = cleanAndParseResponse(data);
+
+      setStoryData(prev => ({
+        ...prev,
+        storyTitle: title,
+        storyContent: content
+      }));
+
+      setInteractionPoint(interactionPoint);
+
+      await generateImage(`Create a scene that illustrates this story: ${content}`);
+
+      toast.success("Story generated successfully!");
+    } catch (error) {
+      console.error('Error generating story:', error);
+      toast.error("Failed to generate story. Please try again.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleChoiceSelection = async (index: number) => {
     if (!interactionPoint) return;
     
     setInteractionPoint(prev => ({
@@ -59,6 +138,10 @@ const Index = () => {
       icon: isCorrect ? <CheckCircle2 className="text-green-500" /> : <XCircle className="text-red-500" />,
       duration: 5000
     });
+
+    if (interactionPoint.continuation) {
+      await generateImage(`Create a scene that illustrates this story continuation: ${interactionPoint.continuation}`, false);
+    }
   };
 
   const cleanAndParseResponse = (response: any) => {
@@ -112,55 +195,6 @@ const Index = () => {
     }
   };
 
-  const generateStory = async () => {
-    if (!storyData.therapyGoal || !storyData.ageGroup || !storyData.communicationLevel || !storyData.studentInterests) {
-      toast.error("Please fill in all required fields");
-      return;
-    }
-
-    setIsGenerating(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('generate-story', {
-        body: {
-          therapyGoal: storyData.therapyGoal,
-          ageGroup: storyData.ageGroup,
-          communicationLevel: storyData.communicationLevel,
-          supportCues: storyData.supportCues,
-          studentInterests: storyData.studentInterests,
-          systemInstructions: `Create an engaging social story with a positive, supportive interaction point.
-            The interaction should:
-            - Focus on practicing positive behaviors and choices
-            - Avoid depicting negative or mean behaviors
-            - Present realistic, age-appropriate scenarios for ${storyData.ageGroup}
-            - Use vocabulary and concepts appropriate for ${storyData.ageGroup}
-            - Encourage empathy and understanding
-            - Maintain a supportive and encouraging tone
-            - Relate directly to the therapy goal
-            - Use language appropriate for the student's communication level`
-        }
-      });
-
-      if (error) throw error;
-
-      const { title, content, interactionPoint } = cleanAndParseResponse(data);
-
-      setStoryData(prev => ({
-        ...prev,
-        storyTitle: title,
-        storyContent: content
-      }));
-
-      setInteractionPoint(interactionPoint);
-
-      toast.success("Story generated successfully!");
-    } catch (error) {
-      console.error('Error generating story:', error);
-      toast.error("Failed to generate story. Please try again.");
-    } finally {
-      setIsGenerating(false);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
       <div className="container mx-auto py-12">
@@ -172,7 +206,6 @@ const Index = () => {
         </p>
         
         <div className="split-panel">
-          {/* Story Setup Panel */}
           <Card className="glass-card p-8 animate-slideIn">
             <div className="space-y-8">
               <div>
@@ -349,7 +382,6 @@ const Index = () => {
             </div>
           </Card>
 
-          {/* Story Editor Panel */}
           <Card className="glass-card p-8 animate-slideIn">
             <h2 className="text-2xl font-semibold text-blue-900 mb-8">Story Editor</h2>
             <div className="space-y-6">
@@ -369,9 +401,17 @@ const Index = () => {
                 <div className="form-group">
                   <Label className="text-blue-900">Story Image</Label>
                   <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50 flex flex-col items-center justify-center aspect-video w-full">
-                    <div className="w-full h-full flex items-center justify-center">
-                      <p className="text-gray-400 text-center">Initial story image will appear here (16:9)</p>
-                    </div>
+                    {storyData.storyImage ? (
+                      <img
+                        src={storyData.storyImage}
+                        alt="Story illustration"
+                        className="w-full h-full object-cover rounded"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <p className="text-gray-400 text-center">Initial story image will appear here (16:9)</p>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -392,9 +432,17 @@ const Index = () => {
                   <div className="form-group">
                     <Label className="text-blue-900">Continuation Image</Label>
                     <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 bg-gray-50 flex flex-col items-center justify-center aspect-video w-full">
-                      <div className="w-full h-full flex items-center justify-center">
-                        <p className="text-gray-400 text-center">Continuation image will appear here (16:9)</p>
-                      </div>
+                      {storyData.continuationImage ? (
+                        <img
+                          src={storyData.continuationImage}
+                          alt="Story continuation illustration"
+                          className="w-full h-full object-cover rounded"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <p className="text-gray-400 text-center">Continuation image will appear here (16:9)</p>
+                        </div>
+                      )}
                     </div>
                   </div>
 
