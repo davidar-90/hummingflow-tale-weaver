@@ -1,19 +1,12 @@
 
 import { useState } from 'react';
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 
 const Index = () => {
   const [storyData, setStoryData] = useState({
-    title: '',
-    patientName: '',
-    age: '',
-    context: '',
-    goals: '',
-    tone: 'friendly'
+    therapyGoal: ''
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -40,74 +33,23 @@ const Index = () => {
             
             <div className="space-y-6">
               <div className="form-group">
-                <Label htmlFor="title" className="text-blue-900">Story Title</Label>
-                <Input
-                  id="title"
-                  value={storyData.title}
-                  onChange={(e) => handleInputChange('title', e.target.value)}
-                  placeholder="Enter a title for the story"
-                  className="text-input"
-                />
-              </div>
-
-              <div className="form-group">
-                <Label htmlFor="patientName" className="text-blue-900">Patient's Name</Label>
-                <Input
-                  id="patientName"
-                  value={storyData.patientName}
-                  onChange={(e) => handleInputChange('patientName', e.target.value)}
-                  placeholder="Enter patient's name"
-                  className="text-input"
-                />
-              </div>
-
-              <div className="form-group">
-                <Label htmlFor="age" className="text-blue-900">Age</Label>
-                <Input
-                  id="age"
-                  type="number"
-                  value={storyData.age}
-                  onChange={(e) => handleInputChange('age', e.target.value)}
-                  placeholder="Enter patient's age"
-                  className="text-input"
-                />
-              </div>
-
-              <div className="form-group">
-                <Label htmlFor="context" className="text-blue-900">Situation/Context</Label>
-                <Textarea
-                  id="context"
-                  value={storyData.context}
-                  onChange={(e) => handleInputChange('context', e.target.value)}
-                  placeholder="Describe the situation or context for the social story"
-                  className="text-input min-h-[100px]"
-                />
-              </div>
-
-              <div className="form-group">
-                <Label htmlFor="goals" className="text-blue-900">Goals/Objectives</Label>
-                <Textarea
-                  id="goals"
-                  value={storyData.goals}
-                  onChange={(e) => handleInputChange('goals', e.target.value)}
-                  placeholder="What are the learning objectives for this story?"
-                  className="text-input min-h-[100px]"
-                />
-              </div>
-
-              <div className="form-group">
-                <Label htmlFor="tone" className="text-blue-900">Story Tone</Label>
+                <Label htmlFor="therapyGoal" className="text-blue-900">Therapy Goal</Label>
                 <Select
-                  value={storyData.tone}
-                  onValueChange={(value) => handleInputChange('tone', value)}
+                  value={storyData.therapyGoal}
+                  onValueChange={(value) => handleInputChange('therapyGoal', value)}
                 >
                   <SelectTrigger className="select-input">
-                    <SelectValue placeholder="Select a tone" />
+                    <SelectValue placeholder="Select a goal..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="friendly">Friendly</SelectItem>
-                    <SelectItem value="supportive">Supportive</SelectItem>
-                    <SelectItem value="direct">Direct</SelectItem>
+                    <SelectItem value="initiating-conversations">Initiating Conversations</SelectItem>
+                    <SelectItem value="turn-taking">Turn-Taking in Conversation</SelectItem>
+                    <SelectItem value="topic-maintenance">Topic Maintenance</SelectItem>
+                    <SelectItem value="facial-expressions">Recognizing Facial Expressions</SelectItem>
+                    <SelectItem value="requesting">Requesting Items/Activities</SelectItem>
+                    <SelectItem value="following-directions">Following Directions</SelectItem>
+                    <SelectItem value="resolving-conflicts">Resolving Conflicts</SelectItem>
+                    <SelectItem value="other">Other (Specify)</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
