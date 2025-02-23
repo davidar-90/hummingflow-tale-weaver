@@ -6,8 +6,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const IMAGEN_API_URL = 'https://generativelanguage.googleapis.com/v1/models/imagen-3.0-generate-002:generateImages';
-const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY2');
+const API_ENDPOINT = "https://api.runware.ai/v1";
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -16,45 +15,64 @@ serve(async (req) => {
 
   try {
     const { prompt } = await req.json();
-    console.log('[Debug] API Key available:', !!GEMINI_API_KEY);
-    console.log('[Debug] Received prompt:', prompt);
+    const RUNWARE_API_KEY = Deno.env.get('RUNWARE_API_KEY');
 
-    const request = {
-      prompt: `High quality digital illustration in a friendly children's book style: ${prompt}`,
-      numberOfImages: 1
-    };
+    if (!RUNWARE_API_KEY) {
+      throw new Error('RUNWARE_API_KEY is not set');
+    }
 
-    console.log('[Debug] Request payload:', JSON.stringify(request, null, 2));
+    console.log('[Debug] Generating image with prompt:', prompt);
 
-    const response = await fetch(`${IMAGEN_API_URL}?key=${GEMINI_API_KEY}`, {
+    const response = await fetch(API_ENDPOINT, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
-      body: JSON.stringify(request)
+      body: JSON.stringify([
+        {
+          taskType: "authentication",
+          apiKey: RUNWARE_API_KEY
+        },
+        {
+          taskType: "imageInference",
+          taskUUID: crypto.randomUUID(),
+          positivePrompt: prompt,
+          model: "runware:100@1",
+          width: 1024,
+          height: 1024,
+          numberResults: 1,
+          outputFormat: "WEBP",
+          CFGScale: 1,
+          scheduler: "FlowMatchEulerDiscreteScheduler",
+          strength: 0.8
+        }
+      ])
     });
-
-    console.log('[Debug] Response status:', response.status);
-    console.log('[Debug] Response status text:', response.statusText);
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('[Debug] Full error response:', errorText);
+      console.error('[Debug] Runware API error:', errorText);
       throw new Error(`Failed to generate image: ${response.statusText} - ${errorText}`);
     }
 
     const data = await response.json();
     console.log('[Debug] Success response:', JSON.stringify(data, null, 2));
 
-    return new Response(JSON.stringify(data), {
+    // Extract the image URL from the response
+    const imageData = data.data.find((item: any) => item.taskType === "imageInference");
+    if (!imageData || !imageData.imageURL) {
+      throw new Error('No image URL in response');
+    }
+
+    return new Response(JSON.stringify({ imageUrl: imageData.imageURL }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {
-    console.error('[Debug] Detailed error:', error);
+    console.error('[Debug] Error in generate-image:', error);
     return new Response(
       JSON.stringify({ 
         error: error.message,
-        stack: error.stack
+        stack: error.stack 
       }),
       {
         status: 500,
