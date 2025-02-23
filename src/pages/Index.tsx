@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -192,24 +191,23 @@ const Index = () => {
       let data = response;
       
       if (typeof response === 'string') {
-        data = response.replace(/```json\n|\n```/g, '').trim();
+        data = response.replace(/```json\n?|```\n?/g, '').trim();
         try {
           data = JSON.parse(data);
         } catch (e) {
-          console.error('First JSON parse failed:', e);
+          console.error('Failed to parse response JSON:', e);
+          throw e;
         }
       }
 
-      if (data.content && typeof data.content === 'string') {
+      if (data.content && typeof data.content === 'string' && data.content.trim().startsWith('{')) {
         try {
-          if (data.content.trim().startsWith('{')) {
-            const innerJson = JSON.parse(data.content);
-            if (innerJson.title && innerJson.content) {
-              data = innerJson;
-            }
+          const innerJson = JSON.parse(data.content);
+          if (innerJson.title && innerJson.content) {
+            data = innerJson;
           }
         } catch (e) {
-          console.error('Inner JSON parse failed:', e);
+          console.error('Failed to parse inner content JSON:', e);
         }
       }
 
@@ -224,11 +222,14 @@ const Index = () => {
         interactionPoint: data.interactionPoint ? {
           prompt: data.interactionPoint.prompt || '',
           choices: Array.isArray(data.interactionPoint.choices) 
-            ? data.interactionPoint.choices 
+            ? data.interactionPoint.choices.map((choice: any) => ({
+                text: choice.text || '',
+                isCorrect: !!choice.isCorrect
+              }))
             : [],
-          feedback: data.interactionPoint.feedback || {
-            correct: '',
-            incorrect: ''
+          feedback: {
+            correct: data.interactionPoint.feedback?.correct || '',
+            incorrect: data.interactionPoint.feedback?.incorrect || ''
           },
           continuation: data.interactionPoint.continuation || '',
           continuationImagePrompt: data.interactionPoint.continuationImagePrompt || ''
@@ -236,12 +237,7 @@ const Index = () => {
       };
     } catch (error) {
       console.error('Error parsing response:', error);
-      return {
-        title: 'Error parsing title',
-        content: 'There was an error processing the story. Please try again.',
-        imagePrompt: '',
-        interactionPoint: null
-      };
+      throw new Error('Failed to parse story response. Please try again.');
     }
   };
 
