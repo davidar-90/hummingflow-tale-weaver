@@ -85,7 +85,7 @@ const Index = () => {
     
     try {
       // Combine story content with continuation if it exists
-      const fullStoryText = interactionPoint?.continuation 
+      const fullStoryText = interactionPoint?.selectedChoice !== undefined && interactionPoint?.continuation 
         ? `${storyData.storyContent}\n\n${interactionPoint.continuation}`
         : storyData.storyContent;
 
@@ -112,10 +112,10 @@ const Index = () => {
       duration: 5000
     });
 
+    // Don't modify the story content, just update the continuation image prompt
     if (interactionPoint.continuation) {
       setStoryData(prev => ({
         ...prev,
-        storyContent: prev.storyContent + '\n\n' + interactionPoint.continuation,
         continuationImagePrompt: interactionPoint.continuationImagePrompt
       }));
     }
@@ -169,7 +169,6 @@ const Index = () => {
           </Card>
 
           <Card className="glass-card p-8 animate-slideIn">
-            <h2 className="text-2xl font-semibold text-blue-900 mb-8">Story Editor</h2>
             <StoryEditor
               storyData={storyData}
               interactionPoint={interactionPoint}
