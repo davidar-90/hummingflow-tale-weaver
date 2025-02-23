@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 const IMAGEN_API_URL = 'https://generativelanguage.googleapis.com/v1/models/imagen-3.0-generate-002:generateImages';
-const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
+const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY2');
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
