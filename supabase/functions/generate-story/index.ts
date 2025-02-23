@@ -35,7 +35,7 @@ serve(async (req) => {
       throw new Error('GEMINI_API_KEY is not configured')
     }
 
-    // User-specific prompt that builds on the system instructions
+    // Updated prompt to avoid markdown formatting
     const prompt = `Based on these specific parameters:
 
 Therapy Goal: ${therapyGoal}
@@ -44,13 +44,13 @@ Student Interests: ${studentInterests}
 
 Create an engaging social story that follows our guidelines, incorporating the student's interests and maintaining appropriate language for their communication level.
 
-Format the response as a JSON object with:
+Return your response in a clean JSON format without any markdown formatting, like this:
 {
-  "title": "An engaging, clear title",
-  "content": "The full story text"
+  "title": "The story title here",
+  "content": "The full story content here with appropriate line breaks"
 }`
 
-    // Call Gemini API with Flash model
+    // Call Gemini API
     const response = await fetch('https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent', {
       method: 'POST',
       headers: {
