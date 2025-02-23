@@ -6,19 +6,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-interface RunwareResponse {
-  data: Array<{
-    taskType: string;
-    taskUUID: string;
-    imageUUID: string;
-    imageURL: string;
-    NSFWContent: boolean;
-    cost: number;
-    seed: number;
-    positivePrompt: string;
-  }>;
-}
-
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -51,7 +38,7 @@ serve(async (req) => {
           positivePrompt: prompt,
           model: "runware:100@1",
           width: 1024,
-          height: 576, // Changed to 16:9 aspect ratio (1024x576)
+          height: 576, // 16:9 aspect ratio
           numberResults: 1,
           outputFormat: "WEBP",
           CFGScale: 1,
@@ -61,7 +48,7 @@ serve(async (req) => {
       ])
     });
 
-    const data = await response.json() as RunwareResponse;
+    const data = await response.json();
     console.log('Runware API response:', JSON.stringify(data, null, 2));
 
     if (!response.ok) {
