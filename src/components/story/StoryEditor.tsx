@@ -3,6 +3,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { StoryData, InteractionPointType } from '@/types/story';
+import { StoryAudioPlayer } from "@/components/story/StoryAudioPlayer";
 
 interface StoryEditorProps {
   storyData: StoryData;
@@ -13,8 +14,12 @@ interface StoryEditorProps {
 export const StoryEditor = ({ storyData, interactionPoint, onInputChange }: StoryEditorProps) => {
   return (
     <div className="space-y-6">
-      <div className="form-group">
+      <div className="flex justify-between items-center mb-4">
         <Label htmlFor="storyTitle" className="text-blue-900">Title</Label>
+        <StoryAudioPlayer />
+      </div>
+
+      <div className="form-group">
         <Input
           id="storyTitle"
           type="text"

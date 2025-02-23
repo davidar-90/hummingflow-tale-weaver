@@ -4,8 +4,8 @@ import { PlayCircle, PauseCircle } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
 interface StoryAudioPlayerProps {
-  audioContent: string | null;
-  isGenerating: boolean;
+  audioContent?: string | null;
+  isGenerating?: boolean;
 }
 
 export const StoryAudioPlayer = ({ audioContent, isGenerating }: StoryAudioPlayerProps) => {
@@ -38,27 +38,23 @@ export const StoryAudioPlayer = ({ audioContent, isGenerating }: StoryAudioPlaye
     }
   };
 
-  if (!audioContent && !isGenerating) {
-    return null;
-  }
-
   return (
-    <div className="mt-4 flex items-center gap-2">
+    <>
       <Button
         onClick={handlePlayPause}
         disabled={isGenerating || !audioContent}
         variant="outline"
         size="icon"
-        className="w-10 h-10"
+        className={`w-10 h-10 ${!audioContent ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-50'}`}
       >
         {isPlaying ? (
-          <PauseCircle className="h-6 w-6" />
+          <PauseCircle className="h-6 w-6 text-blue-600" />
         ) : (
-          <PlayCircle className="h-6 w-6" />
+          <PlayCircle className={`h-6 w-6 ${audioContent ? 'text-blue-600' : 'text-gray-400'}`} />
         )}
       </Button>
       {isGenerating && (
-        <span className="text-sm text-blue-600 animate-pulse">
+        <span className="text-sm text-blue-600 animate-pulse ml-2">
           Generating voice...
         </span>
       )}
@@ -67,6 +63,6 @@ export const StoryAudioPlayer = ({ audioContent, isGenerating }: StoryAudioPlaye
         onEnded={() => setIsPlaying(false)}
         className="hidden"
       />
-    </div>
+    </>
   );
 };
