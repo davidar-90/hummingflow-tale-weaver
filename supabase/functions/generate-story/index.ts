@@ -23,6 +23,42 @@ Your stories should:
 - Include concrete examples and clear action steps
 - Maintain an engaging narrative that connects with the child's interests`
 
+// Helper function to extract and parse JSON from Gemini response
+function parseGeminiResponse(response: string): { title: string; content: string } | null {
+  try {
+    // Step 1: Remove triple backticks if present
+    let cleanedResponse = response.replace(/^```json\s*|\s*```$/g, '').trim();
+
+    // Step 2 & 3: Find and extract JSON object
+    const firstBrace = cleanedResponse.indexOf('{');
+    const lastBrace = cleanedResponse.lastIndexOf('}');
+    
+    if (firstBrace === -1 || lastBrace === -1) {
+      console.error('No valid JSON object found in response');
+      return null;
+    }
+
+    const jsonStr = cleanedResponse.substring(firstBrace, lastBrace + 1);
+
+    // Step 4: Parse the JSON
+    const parsed = JSON.parse(jsonStr);
+
+    // Validate the structure
+    if (!parsed.title || !parsed.content) {
+      console.error('Parsed JSON missing required fields');
+      return null;
+    }
+
+    return {
+      title: parsed.title.trim(),
+      content: parsed.content.trim()
+    };
+  } catch (error) {
+    console.error('Error parsing Gemini response:', error);
+    return null;
+  }
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -35,7 +71,6 @@ serve(async (req) => {
       throw new Error('GEMINI_API_KEY is not configured')
     }
 
-    // Updated prompt to avoid markdown formatting
     const prompt = `Based on these specific parameters:
 
 Therapy Goal: ${therapyGoal}
@@ -44,10 +79,10 @@ Student Interests: ${studentInterests}
 
 Create an engaging social story that follows our guidelines, incorporating the student's interests and maintaining appropriate language for their communication level.
 
-Return your response in a clean JSON format without any markdown formatting, like this:
+Format your response as a JSON object like this, without any markdown formatting or additional text:
 {
-  "title": "The story title here",
-  "content": "The full story content here with appropriate line breaks"
+  "title": "An engaging, clear title",
+  "content": "The full story content with appropriate line breaks"
 }`
 
     // Call Gemini API
@@ -97,7 +132,7 @@ Return your response in a clean JSON format without any markdown formatting, lik
     }
 
     const data = await response.json()
-    console.log('Gemini API Response:', data)
+    console.log('Raw Gemini API Response:', data)
 
     if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
       console.error('Unexpected Gemini API response structure:', data)
@@ -106,27 +141,20 @@ Return your response in a clean JSON format without any markdown formatting, lik
 
     // Extract the text from the response
     const generatedText = data.candidates[0].content.parts[0].text
+    console.log('Generated text before parsing:', generatedText)
 
-    // Parse the response to extract title and content
-    try {
-      const parsedResponse = JSON.parse(generatedText)
-      return new Response(JSON.stringify(parsedResponse), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
-    } catch (error) {
-      console.error('Error parsing Gemini response:', error)
-      // Fallback parsing logic if JSON parsing fails
-      const lines = generatedText.split('\n')
-      let title = lines[0]
-      if (title.toLowerCase().startsWith('title:')) {
-        title = title.slice(6).trim()
-      }
-      const content = lines.slice(1).join('\n').trim()
-      
-      return new Response(JSON.stringify({ title, content }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
+    // Use the new parsing function
+    const parsedResponse = parseGeminiResponse(generatedText)
+    
+    if (!parsedResponse) {
+      throw new Error('Failed to parse Gemini response into valid JSON')
     }
+
+    return new Response(
+      JSON.stringify(parsedResponse),
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+    )
+
   } catch (error) {
     console.error('Error in generate-story function:', error)
     return new Response(
