@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -128,37 +127,42 @@ export const StoryForm = ({
           placeholder="e.g., space, dinosaurs"
           value={storyData.studentInterests}
           onChange={(e) => onInputChange('studentInterests', e.target.value)}
-          className="w-full px-4 py-3 rounded-xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400"
+          className={`text-input ${storyData.studentInterests ? 'text-black' : 'text-gray-500'}`}
         />
       </div>
 
       <div className="form-group">
-        <div className="grid grid-cols-3 gap-4">
+        <div className="flex flex-wrap gap-4">
           <Button 
-            variant="default"
+            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-6 rounded-xl shadow-md transition-colors duration-200"
             onClick={onGenerateStory}
             disabled={isGenerating}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
           >
             {isGenerating ? 'Generating...' : 'Generate Story'}
             <Sparkles className="ml-2 h-5 w-5" />
           </Button>
 
           <Button 
-            variant="default"
+            className={`flex-1 py-6 rounded-xl shadow-md transition-colors duration-200 ${
+              hasStory 
+                ? 'bg-purple-600 hover:bg-purple-700 text-white' 
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            }`}
             onClick={onGenerateImage}
             disabled={!hasStory || isGeneratingImage}
-            className={hasStory ? 'bg-purple-600 hover:bg-purple-700 text-white' : 'bg-gray-300 text-gray-500'}
           >
             {isGeneratingImage ? 'Generating...' : 'Generate Image'}
             <ImageIcon className="ml-2 h-5 w-5" />
           </Button>
 
           <Button 
-            variant="default"
+            className={`flex-1 py-6 rounded-xl shadow-md transition-colors duration-200 ${
+              hasStory 
+                ? 'bg-green-600 hover:bg-green-700 text-white' 
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+            }`}
             onClick={onGenerateVoice}
             disabled={!hasStory || isGeneratingVoice}
-            className={hasStory ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-gray-300 text-gray-500'}
           >
             {isGeneratingVoice ? 'Generating...' : 'Generate Voice'}
             <MicIcon className="ml-2 h-5 w-5" />

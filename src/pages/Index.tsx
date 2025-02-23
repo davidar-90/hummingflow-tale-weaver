@@ -1,8 +1,7 @@
-
 import { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { RefreshCw, Feather } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { StoryForm } from "@/components/story/StoryForm";
 import { InteractionPoint } from "@/components/story/InteractionPoint";
@@ -121,33 +120,26 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen">
-      <div className="container mx-auto py-12 px-4 sm:px-6">
-        <div className="max-w-4xl mx-auto text-center mb-16">
-          <div className="flex items-center justify-center gap-4 mb-4">
-            <Feather className="w-12 h-12 text-blue-500" strokeWidth={1.5} />
-            <h1 className="text-5xl md:text-6xl font-bold hero-gradient tracking-tight">
-              HummingFlow Studio
-            </h1>
-          </div>
-          <p className="text-lg md:text-xl hero-subtitle">
-            Create engaging social stories that make a difference
-          </p>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-white">
+      <div className="container mx-auto py-12">
+        <h1 className="text-4xl md:text-5xl font-bold text-center mb-2 hero-gradient animate-fadeIn">
+          HummingFlow Studio
+        </h1>
+        <p className="text-center text-blue-600/80 mb-12 animate-fadeIn">
+          Create engaging social stories that make a difference
+        </p>
         
         <div className="split-panel">
-          <Card className="glass-card feather-card rounded-2xl p-8">
+          <Card className="glass-card p-8 animate-slideIn">
             <div className="space-y-8">
               <div>
                 <div className="flex justify-between items-center mb-8">
-                  <h2 className="text-2xl font-semibold bg-gradient-to-br from-gray-800 to-gray-600 bg-clip-text text-transparent">
-                    Story Setup
-                  </h2>
+                  <h2 className="text-2xl font-semibold text-blue-900">Story Setup</h2>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={clearStory}
-                    className="text-gray-600 hover:text-blue-600 hover:border-blue-400/30 transition-colors duration-300"
+                    className="text-gray-600 hover:text-blue-600"
                   >
                     <RefreshCw className="h-4 w-4 mr-2" />
                     Clear Story
@@ -174,7 +166,7 @@ const Index = () => {
             </div>
           </Card>
 
-          <Card className="glass-card feather-card rounded-2xl p-8">
+          <Card className="glass-card p-8 animate-slideIn">
             <StoryEditor
               storyData={storyData}
               interactionPoint={interactionPoint}
