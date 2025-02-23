@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { StoryData, InteractionPointType } from '@/types/story';
 import { StoryAudioPlayer } from "@/components/story/StoryAudioPlayer";
+import { useEffect, useRef } from "react";
 
 interface StoryEditorProps {
   storyData: StoryData;
@@ -20,13 +21,25 @@ export const StoryEditor = ({
   audioContent,
   isGeneratingVoice 
 }: StoryEditorProps) => {
-  // Calculate dynamic height based on content
-  const getTextareaHeight = (text: string) => {
-    const lines = text.split('\n').length;
-    const lineHeight = 24; // approximate line height in pixels
-    const padding = 32; // total vertical padding
-    return Math.max((lines * lineHeight) + padding, 80); // minimum height of 80px
+  const storyContentRef = useRef<HTMLTextAreaElement>(null);
+  const continuationRef = useRef<HTMLTextAreaElement>(null);
+
+  // Function to adjust textarea height
+  const adjustTextareaHeight = (textarea: HTMLTextAreaElement | null) => {
+    if (textarea) {
+      textarea.style.height = 'auto'; // Reset height to recalculate
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
   };
+
+  // Adjust heights when content changes
+  useEffect(() => {
+    adjustTextareaHeight(storyContentRef.current);
+  }, [storyData.storyContent]);
+
+  useEffect(() => {
+    adjustTextareaHeight(continuationRef.current);
+  }, [interactionPoint?.continuation]);
 
   return (
     <div className="space-y-6">
@@ -55,12 +68,15 @@ export const StoryEditor = ({
         <div className="form-group">
           <Label htmlFor="storyContent" className="text-blue-900 mb-3 block">Story Content</Label>
           <Textarea
+            ref={storyContentRef}
             id="storyContent"
             placeholder="Story content will appear here..."
             value={storyData.storyContent}
-            onChange={(e) => onInputChange('storyContent', e.target.value)}
-            style={{ height: `${getTextareaHeight(storyData.storyContent)}px` }}
-            className={`text-input resize-none bg-white/50 ${storyData.storyContent ? 'text-black' : 'text-gray-500'} whitespace-pre-wrap transition-all duration-200`}
+            onChange={(e) => {
+              onInputChange('storyContent', e.target.value);
+              adjustTextareaHeight(storyContentRef.current);
+            }}
+            className={`text-input resize-none bg-white/50 ${storyData.storyContent ? 'text-black' : 'text-gray-500'} whitespace-pre-wrap transition-all duration-200 min-h-[100px]`}
           />
         </div>
 
@@ -87,11 +103,11 @@ export const StoryEditor = ({
           <div className="form-group">
             <Label htmlFor="continuation" className="text-blue-900 mb-3 block">Story Continuation</Label>
             <Textarea
+              ref={continuationRef}
               id="continuation"
               value={interactionPoint.continuation}
               readOnly
-              style={{ height: `${getTextareaHeight(interactionPoint.continuation)}px` }}
-              className="text-input resize-none bg-white/50 text-black whitespace-pre-wrap transition-all duration-200"
+              className="text-input resize-none bg-white/50 text-black whitespace-pre-wrap transition-all duration-200 min-h-[100px]"
             />
           </div>
 
