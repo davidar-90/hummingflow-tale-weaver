@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Card } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -37,32 +36,40 @@ const Index = () => {
         // Remove markdown code block syntax if present
         data = response.replace(/```json\n|\n```/g, '').trim();
         
-        // If the string starts with a bracket or brace, try to parse it as JSON
-        if (data.startsWith('{') || data.startsWith('[')) {
+        // Try to parse the string as JSON
+        try {
           data = JSON.parse(data);
+        } catch (e) {
+          console.error('First JSON parse failed:', e);
         }
       }
 
-      // If we have an object with title/content properties
-      if (data && typeof data === 'object') {
-        // Extract title and content, cleaning any remaining JSON artifacts
-        let title = data.title || '';
-        let content = data.content || '';
-
-        // Clean the title
-        title = title.replace(/^["']|["']$/g, '').trim();
-        
-        // Clean the content
-        content = content
-          .replace(/\\n/g, '\n') // Convert \n to actual line breaks
-          .replace(/\\"/g, '"') // Convert escaped quotes
-          .replace(/^["']|["']$/g, '') // Remove surrounding quotes
-          .trim();
-
-        return { title, content };
+      // At this point data might be double-wrapped in JSON
+      if (data.content && typeof data.content === 'string') {
+        try {
+          // Try to parse the content as JSON if it looks like JSON
+          if (data.content.trim().startsWith('{')) {
+            const innerJson = JSON.parse(data.content);
+            if (innerJson.title && innerJson.content) {
+              data = innerJson; // Use the inner JSON object
+            }
+          }
+        } catch (e) {
+          console.error('Inner JSON parse failed:', e);
+        }
       }
 
-      throw new Error('Invalid response format');
+      // Extract and clean the title and content
+      const title = (data.title || '').replace(/^["']|["']$/g, '').trim();
+      const content = (data.content || '')
+        .replace(/\\n/g, '\n') // Convert \n to actual line breaks
+        .replace(/\\"/g, '"') // Convert escaped quotes
+        .replace(/^["']|["']$/g, '') // Remove surrounding quotes
+        .trim();
+
+      console.log('Cleaned data:', { title, content }); // Debug log
+
+      return { title, content };
     } catch (error) {
       console.error('Error parsing response:', error);
       return {
