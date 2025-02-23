@@ -23,9 +23,9 @@ export const StoryEditor = ({
   // Calculate dynamic height based on content
   const getTextareaHeight = (text: string) => {
     const lines = text.split('\n').length;
-    const minHeight = 200;
     const lineHeight = 24; // approximate line height in pixels
-    return Math.max(minHeight, (lines * lineHeight) + 40); // add padding
+    const padding = 32; // total vertical padding
+    return Math.max((lines * lineHeight) + padding, 80); // minimum height of 80px
   };
 
   return (
